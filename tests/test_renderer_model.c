@@ -591,6 +591,7 @@ TEST(renderer_model, mdx_ribbon_visibility_defaults_outside_death_keys) {
     T_EQ(nverts, 6);
     T_FEQ(verts[0].position.y, 20.0f, 0.001f);
     T_FEQ(verts[1].position.y, -20.0f, 0.001f);
+    MDLX_ForgetRibbonModel(&model); /* match model-unload registry lifetime */
     if (model.ribbon_states) {
         test_free(model.ribbon_states->trails);
         test_free(model.ribbon_states);
@@ -620,6 +621,7 @@ TEST(renderer_model, mdx_ribbon_second_emit_same_frame_does_not_advance) {
     tr.viewDef.time = 1050;
     T_EQ(MDLX_EmitRibbonVertices(&model, &entity, &matrix, &ribbon, verts, 64), 6);
     T_EQ(model.ribbon_states->trails[0].count, 2);
+    MDLX_ForgetRibbonModel(&model); /* match model-unload registry lifetime */
     if (model.ribbon_states) {
         test_free(model.ribbon_states->trails);
         test_free(model.ribbon_states);
@@ -654,6 +656,7 @@ TEST(renderer_model, mdx_ribbon_entity_reuse_after_gap_drops_old_edges) {
     T_EQ(nverts, 6);
     FOR_LOOP(i, nverts) /* no streak back to the old impact point */
         T_ASSERT(fabsf(verts[i].position.x - 10000.0f) < 1.0f);
+    MDLX_ForgetRibbonModel(&model); /* match model-unload registry lifetime */
     if (model.ribbon_states) {
         test_free(model.ribbon_states->trails);
         test_free(model.ribbon_states);
@@ -2095,4 +2098,13 @@ TEST(renderer_backdrop, mirrored_background_is_independent_of_tiling) {
 TEST(renderer_shader, commandbutton_supports_generic_radial_shade) {
     T_NOT_NULL(strstr(sd_commandbutton.FragmentBody, "u_radialShade"));
     T_NOT_NULL(strstr(sd_commandbutton.FragmentBody, "atan(radial.x, -radial.y)"));
+}
+
+TEST(renderer_model, absent_cvar_host_uses_authored_defaults) {
+    __typeof__(ri.CvarString) saved = ri.CvarString;
+    ri.CvarString = NULL; /* standalone viewers have no engine cvar registry */
+    T_ASSERT(!R_CvarEnabled("vid_hidden", "0"));
+    T_ASSERT(!R_CvarEnabled("vid_modes", "0"));
+    T_ASSERT(R_CvarEnabled("r_lighting", "1"));
+    ri.CvarString = saved;
 }

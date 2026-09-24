@@ -76,7 +76,7 @@ reference.
 ## 2. `render_golden.sh` — golden-image regression test
 
 Renders each model in `golden_manifest.txt` to a **deterministic** PNG via
-`mdxtool -o` (fixed frame + seeded particle RNG → byte-stable output) and
+`mdxtool -o` (fixed frame + seeded particle RNG) and
 compares it to a committed reference in `golden/` with `imgdiff`. Fails if any
 render drifts beyond the mean-pixel-difference threshold.
 
@@ -84,7 +84,9 @@ render drifts beyond the mean-pixel-difference threshold.
 make test-render-golden        # compare against golden/ (exit non-zero on drift)
 make update-render-golden      # regenerate golden/ after an intentional change
 # or directly:
-tools/parity/render_golden.sh [--update] [--threshold 2.0] [--data <dir>]
+tools/parity/render_golden.sh --repeat --data "$WC3DATA"
+# Focused manifest, bounded per-render execution:
+tools/parity/render_golden.sh --manifest /path/to/case.txt --repeat --timeout 60 --data "$WC3DATA"
 ```
 
 This requires a display/GL (mdxtool opens a window), so it is **opt-in** and not
@@ -97,14 +99,38 @@ self-contained in one archive that exercise distinct renderer paths (flipbook
 water, team color, particles, geometry). Glue scenes need `--use-model-camera`;
 units use the default fitted orbit camera.
 
-When a comparison fails, the offending render and an amplified diff are written
-to `tools/parity/_last_fail_<name>.png` / `_last_fail_<name>.diff.png` for
-inspection.
+Each invocation retains its manifest, revision information, commands, renderer logs, images, and
+comparison output in a unique `build/parity/render-XXXXXX/` directory, printed at startup.
+GNU `timeout` (or `gtimeout` from coreutils on macOS) bounds each render to 60 seconds by default,
+with a five-second kill grace period. Archives are resolved by their actual filename, including
+case differences and an expansion subdirectory; ambiguous matches fail explicitly.
+
+`--repeat` renders every case twice and requires exact decoded pixel equality before comparing
+or updating a reference. This checks repeatability on the current machine, not equivalence across
+GPU/driver versions. A repeat failure, failed render, missing output/reference, or empty manifest
+is a failure. Update mode also returns failure when a render fails; it may already have updated
+preceding successful cases. Review the diff before accepting any reference changes. A reference
+image records accepted behavior; it is not evidence that behavior matches retail.
+
+`make test-render-harness` exercises failure propagation using fake renderer/comparator processes,
+without retail data or GL. It is included in `make test`. The actual image suite remains opt-in.
+For the current baseline and the NightElfX01 investigation, see
+[renderer verification](../../docs/renderer-verification.md).
+
+## Live render inspection
+
+Source `tools/parity/render_inspect.py` in GDB attached to a matching debug build, then run
+`render-dump /tmp/render.json` and detach. It reads camera, entity/model identities, and exact
+animation frames without calling code in the process. Replay a submitted frame with
+`mdxtool --raw-frame <frame> --background 808080 --dump-all -o /tmp/repro.png`.
+See [renderer verification](../../docs/renderer-verification.md#inspecting-a-live-rendering-failure)
+for symbol requirements, limitations, and the confirmed NightElfX01 case.
 
 ## Pieces
 
 - `mdxtool -o <png> [--frame <ms>] [--seed <n>]` — deterministic clean render to
-  PNG (in `tools/mdxtool.c`).
+  PNG (in `tools/mdxtool.c`). `--background 808080` exposes black opaque geometry
+  that can disappear against the default black clear color.
 - `imgdiff a b [--threshold m] [--pixel-tol t] [--diff out.png]` — image compare
   (in `tools/imgdiff.c`; standalone, stb-only).
 - `golden/` — committed reference PNGs (regenerate with `--update`).

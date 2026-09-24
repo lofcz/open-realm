@@ -52,6 +52,9 @@ schema as `g_metadata.c`.
 
 ## MDX Inspection (mdxtool)
 
+See [renderer verification](renderer-verification.md) for acceptance layers, known baseline failures,
+and retained repeat-render evidence. Use `--background 808080` to expose black opaque geometry.
+
 - Use `build/bin/mdxtool` to validate MDX assets and detect data problems before debugging render code.
 - CLI synopsis:
 	- `build/bin/mdxtool -mpq <path-to-mpq> -model <archive-model-path> [--anim <sequence>] [--use-model-camera] [--front-ortho] [--info] [--dump-all] [--once]`

@@ -13,6 +13,14 @@ The map's `war3map.doo` placement owns each doodad's type, position, variation, 
 
 Changing a doodad animation is presentation state only.  It does not turn the doodad into a destructable and does not change its pathing footprint.
 
+## Initial world pose
+
+Spawn starts the authored Stand sequence through `G_DoodadSetAnimation`, using the same clock
+and override path as scripted animations. Frame zero is not necessarily a valid Stand pose.
+NightElfX01's fishing-village buildings start Stand at 4167; frame zero exposes their opaque
+portrait-background geoset in the world. See the [confirmed investigation and live inspection
+workflow](../../renderer-verification.md#nightelfx01-black-plane-investigation).
+
 ## Runtime Flow
 
 ```text
@@ -52,6 +60,7 @@ Doodad model lookup follows the `Doodads.slk` `file` field directly.  A numeric 
 
 Automated coverage should verify:
 
+- spawn enters a nonzero Stand interval, advances, loops, and accepts a scripted replacement;
 - rectangle filtering changes only matching doodad rawcodes inside the rect;
 - `nearestOnly` changes one nearest matching doodad inside the radius;
 - `show`/`hide` are presentation-only;

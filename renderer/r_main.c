@@ -645,7 +645,7 @@ void R_InitRenderer(DWORD width, DWORD height) {
      * activates the process regardless of window visibility.  Set the policy
      * to Prohibited first so the app never appears in the Dock or takes focus.
      * NSApplicationActivationPolicyProhibited = 2. */
-    if (atoi(ri.CvarString("vid_hidden", "0"))) {
+    if (R_CvarEnabled("vid_hidden", "0")) {
         MacId ns_app = ((MacId(*)(MacId, MacSel))objc_msgSend)(
             objc_getClass("NSApplication"),
             sel_registerName("sharedApplication"));
@@ -686,20 +686,20 @@ void R_InitRenderer(DWORD width, DWORD height) {
             sdl_version.patch);
     fprintf(stderr, "SDL video driver is \"%s\".\n", SDL_GetCurrentVideoDriver());
     /* The full SDL mode list is diagnostic output, previously printed on every startup. */
-    if (atoi(ri.CvarString("vid_modes", "0"))) R_PrintDisplayModes();
+    if (R_CvarEnabled("vid_modes", "0")) R_PrintDisplayModes();
     R_ResolveInitialWindowSize(&width, &height);
     fprintf(stderr, "Video initialized.\n\n");
     
     fprintf(stderr, "Refresher initialization.\n");
     Uint32 win_vis = R_VideoHidden() ? SDL_WINDOW_HIDDEN : SDL_WINDOW_SHOWN;
-    window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | win_vis | SDL_WINDOW_ALLOW_HIGHDPI);
+    window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | win_vis | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
     context = window ? SDL_GL_CreateContext(window) : NULL;
     if (!context && requested_msaa) {
         fprintf(stderr, "OpenGL: %dx MSAA context unavailable (%s); retrying without MSAA\n", requested_msaa, SDL_GetError());
         if (window) SDL_DestroyWindow(window);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 0);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
-        window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | win_vis | SDL_WINDOW_ALLOW_HIGHDPI);
+        window = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_OPENGL | win_vis | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);
         context = window ? SDL_GL_CreateContext(window) : NULL;
     }
     if (context && SDL_GL_MakeCurrent(window, context) == 0) {

@@ -32,7 +32,9 @@ static bool g_run_once = false;
  * one clean frame (no overlay/bbox), with a fixed logical time and seeded RNG so
  * the PNG is byte-stable across runs, then exits. */
 static const char *g_output_path = NULL;
+static long g_raw_frame = -1; /* replay the renderer submission without selecting a sequence */
 static long g_fixed_time = -1;   /* logical ms; -1 => wall clock (SDL_GetTicks) */
+static unsigned g_background; /* RGB diagnostic clear color, black by default */
 static long g_seed = -1;         /* srand seed for particle RNG; -1 => unseeded */
 static HANDLE archives[64] = { 0 };
 static viewer_orbit_t orbit;
@@ -127,6 +129,8 @@ static void usage(void) {
     "  --info --dump-all samples bone translations at 2%% intervals; --anim filters the sequence.\n"
     "  --front-ortho uses a front-facing orthographic preview camera for flat UI models.\n"
     "  --dump-all prints loaded model details (nodes, bones, geosets, materials, cameras).\n"
+    "  --raw-frame <ms>: use an absolute MDX frame, as submitted by a live entity.\n"
+    "  --background <RRGGBB>: clear color; use a light color to expose opaque black geometry.\n"
     "  --once renders one frame and exits.\n"
     "  -o/--output <file.png> renders one clean frame (no overlay/bbox) to a PNG and exits.\n"
     "    Deterministic by default (--frame 1000 --seed 1234) for golden-image tests.\n"
@@ -1141,6 +1145,8 @@ static void RenderModelFrame(refExport_t const *re, LPMODEL model, DWORD now, bo
         entity.oldframe = entity.frame;
     }
 
+    if (g_raw_frame >= 0) entity.frame = entity.oldframe = (DWORD)g_raw_frame;
+
     if (mdx) {
         BOX3 const *box = &mdx->bounds.box;
         float width = fabsf(box->max.x - box->min.x);
@@ -1192,6 +1198,8 @@ static void RenderModelFrame(refExport_t const *re, LPMODEL model, DWORD now, bo
     viewdef.rdflags = RDF_NOWORLDMODEL | RDF_NOFRUSTUMCULL;
     Matrix4_identity(&viewdef.textureMatrix);
 
+    glClearColor(((g_background >> 16) & 255) / 255.0f,
+                 ((g_background >> 8) & 255) / 255.0f, (g_background & 255) / 255.0f, 1.0f);
     re->BeginFrame();
     re->RenderFrame(&viewdef);
     /* Clean render: golden-image PNG output skips the debug bbox/overlay/text. */
@@ -1328,6 +1336,20 @@ int main(int argc, char **argv) {
             g_run_once = true;
             if (g_fixed_time < 0) g_fixed_time = 1000;
             if (g_seed < 0) g_seed = 1234;
+        } else if (!strcmp(argv[i], "--raw-frame")) {
+            char *end;
+            if (++i >= argc) { usage(); return 1; }
+            g_raw_frame = strtol(argv[i], &end, 10);
+            if (!*argv[i] || *end || g_raw_frame < 0 || (unsigned long)g_raw_frame > UINT32_MAX) {
+                fprintf(stderr, "mdxtool: --raw-frame requires an unsigned 32-bit frame\n");
+                return 1;
+            }
+        } else if (!strcmp(argv[i], "--background")) {
+            if (++i >= argc || strlen(argv[i]) != 6 || strspn(argv[i], "0123456789abcdefABCDEF") != 6) {
+                fprintf(stderr, "mdxtool: --background requires six hex digits (RRGGBB)\n");
+                return 1;
+            }
+            g_background = (unsigned)strtoul(argv[i], NULL, 16);
         } else if (!strcmp(argv[i], "--frame") || !strcmp(argv[i], "-frame")) {
             if (++i >= argc) { usage(); return 1; }
             g_fixed_time = strtol(argv[i], NULL, 10);
@@ -1510,6 +1532,7 @@ int main(int argc, char **argv) {
         if (seq && seq->interval[1] > seq->interval[0]) {
             sample_frame = seq->interval[0] + ((seq->interval[1] - seq->interval[0]) / 2);
         }
+        if (g_raw_frame >= 0) sample_frame = (DWORD)g_raw_frame;
         fprintf(stderr, "mdxtool --dump-all: sample_frame=%u requested_anim=%s\n",
                 (unsigned)sample_frame,
                 g_requested_animation ? g_requested_animation : "(auto)");

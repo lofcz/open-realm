@@ -74,7 +74,7 @@ typedef enum render_phase_e {
 
 extern refImport_t ri;
 
-static inline BOOL R_CvarEnabled(LPCSTR name, LPCSTR fallback) { return !ri.CvarString || atoi(ri.CvarString(name, fallback)); }
+static inline BOOL R_CvarEnabled(LPCSTR name, LPCSTR fallback) { return atoi(ri.CvarString ? ri.CvarString(name, fallback) : fallback) != 0; }
 static inline uint64_t R_PrimitiveTriangles(GLenum mode, DWORD count, DWORD instances) {
     return mode == GL_TRIANGLES ? (uint64_t)(count / 3) * instances : 0;
 }
