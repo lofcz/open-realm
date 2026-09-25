@@ -4,6 +4,10 @@
 
 The aggregate `test` target runs independent standalone, engine, and game-suite targets. Each `test_schema` target now has two stages: a persistent binary target and a test execution target. The binary depends on its compiled source list, so source edits rebuild it while repeated test runs execute without recompiling.
 
+`test-renderer-model` and `test-renderer-shadows` also depend on `renderer/r_local.h` for header-driven rebuilds.
+Both compile `tests/test_renderer_game.c` and `common/mpq.c` for the WC3 minimap asset lifecycle tests;
+retain `test-assets`, `$(SHEET_LIB)`, section garbage collection, and sheet/zlib linkage in both rules.
+
 The aggregate target runs the suites concurrently through recursive Make. `TEST_JOBS` controls the concurrency and defaults to 16; this was fastest on the local 8-core macOS machine in the measurements below.
 
 The `test-jass-build` shell recipe is marked recursive with `+` because its script invokes Make. This preserves
@@ -29,6 +33,14 @@ After incremental binaries and parallel suite execution:
 The final runs passed all 17 suite summaries. The default run processes about 1,235 tests per 5 seconds, exceeding the 1,000-tests-per-5-seconds target. With `TEST_JOBS=16`, throughput is about 1,457 tests per 5 seconds. Compared with the repeatable pre-change run, default wall time improved by 80%.
 
 ## Diagnostic Workflow
+
+On hosts using SDL2 compatibility over SDL3, a crash in `SDL_PushEvent` for a text event can occur
+with only `SDL_INIT_EVENTS` initialized (observed on Arch Linux). The standalone sequence
+`SDL_InitSubSystem(SDL_INIT_EVENTS)`, `SDL_PushEvent` with `SDL_TEXTINPUT` reproduces it without
+engine code. Native SDL2 2.32.10 passes the same probe and the focused
+`client_input.menu_sdl_input_is_exclusive_with_world_presentation` test. To validate without
+replacing system libraries, build native SDL2 outside the repository and run
+`LD_LIBRARY_PATH=/path/to/SDL2/build make test`.
 
 Run the full suite with timing:
 

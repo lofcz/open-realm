@@ -37,6 +37,7 @@ This codebase is inspired by **Quake 2** (id Software). The developer is deeply 
 | WC3 data model (SLK, unit stats, combat) | [docs/wc3-data-model.md](docs/wc3-data-model.md) |
 | WC3 attack damage math, runtime modifiers, armor/type multipliers, projectile impact timing | [docs/games/warcraft-3/attack-damage.md](docs/games/warcraft-3/attack-damage.md) |
 | WC3 JASS native coverage, callback contracts, state ownership | [docs/games/warcraft-3/jass-native-coverage.md](docs/games/warcraft-3/jass-native-coverage.md) |
+| WC3 event-trigger queueing, synchronous `TriggerExecute`, coroutine context | [docs/games/warcraft-3/trigger-events.md](docs/games/warcraft-3/trigger-events.md) |
 | WC3 timer-dialog mission countdowns, stock FDF HUD, local visibility, save/load identity | [docs/games/warcraft-3/timer-dialogs.md](docs/games/warcraft-3/timer-dialogs.md) |
 | WC3 leaderboards, counted-objective HUDs, per-player assignment, save/load identity | [docs/games/warcraft-3/leaderboards.md](docs/games/warcraft-3/leaderboards.md) |
 | WC3 multiboard/texttag JASS registries, local display bits, presentation gaps | [docs/games/warcraft-3/multiboard-and-texttag.md](docs/games/warcraft-3/multiboard-and-texttag.md) |
@@ -60,6 +61,7 @@ This codebase is inspired by **Quake 2** (id Software). The developer is deeply 
 | WC3 pre-rendered movies, optional FFmpeg backend, `PlayCinematic` lifecycle, campaign camera rows | [docs/games/warcraft-3/pre-rendered-movies.md](docs/games/warcraft-3/pre-rendered-movies.md) |
 | WC3 W3I/W3R/JASS weather lifecycle, Weather.slk particle rendering, rain tails | [docs/games/warcraft-3/weather.md](docs/games/warcraft-3/weather.md) |
 | WC3 alerts, minimap pings, eight-entry Spacebar recent-alert history, quick-position fallback | [docs/games/warcraft-3/alerts-and-minimap-pings.md](docs/games/warcraft-3/alerts-and-minimap-pings.md) |
+| WC3 automatic minimap unit/building/Hero/mine contacts, snapshot metadata, team colors, known marker gaps | [docs/games/warcraft-3/minimap-markers.md](docs/games/warcraft-3/minimap-markers.md) |
 | WC3 Quest journal, single-player Message Log, upper-button wiring, retained message history | [docs/games/warcraft-3/quest-and-message-log-ui.md](docs/games/warcraft-3/quest-and-message-log-ui.md) |
 | Developer cheat commands, WC3 quest/trigger/objective/JASS/cinematic debugging and in-game console feedback | [docs/cheat-commands.md](docs/cheat-commands.md) |
 | WC3 in-game Menu/F10 overlay, EscMenu panel flow, modal pause/input, leave/exit actions | [docs/games/warcraft-3/in-game-menu.md](docs/games/warcraft-3/in-game-menu.md) |
@@ -93,6 +95,7 @@ This codebase is inspired by **Quake 2** (id Software). The developer is deeply 
 | WC3 Hero death persistence and Altar revival lifecycle | [docs/games/warcraft-3/hero-revival.md](docs/games/warcraft-3/hero-revival.md) |
 | WC3 Rally producer state, Smart handoff, target lifetime, JASS getters | [docs/games/warcraft-3/rally-points.md](docs/games/warcraft-3/rally-points.md) |
 | WC3 pathfinding, flow fields, collision-sized routing, unreachable lumber targets | [docs/games/warcraft-3/pathfinding.md](docs/games/warcraft-3/pathfinding.md) |
+| WC3 Way Gates, JASS destination/activation state, explicit Smart traversal, portal-routing gap | [docs/games/warcraft-3/way-gates.md](docs/games/warcraft-3/way-gates.md) |
 | WC3 unit altitude, `moveHeight`, water/bridge support surfaces, fly-height natives, projectile impact Z | [docs/games/warcraft-3/unit-altitude.md](docs/games/warcraft-3/unit-altitude.md) |
 | WC3 runtime unit spawn, `CreateUnit` birth ownership, immediate stand state, and stale birth waits | [docs/games/warcraft-3/unit-spawn-lifecycle.md](docs/games/warcraft-3/unit-spawn-lifecycle.md) |
 | WC3 Human07 mission-end investigation, confirmed fixes, and regression evidence | [docs/games/warcraft-3/human07-troubleshooting.md](docs/games/warcraft-3/human07-troubleshooting.md) |

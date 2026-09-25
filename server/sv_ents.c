@@ -15,12 +15,15 @@
 #include "server.h"
 
 #define VISUAL_DISTANCE 1500
+#define SNAPSHOT_NEAR_ENTITY_DISTANCE 256 // world units; nearby world presentation outranks distant contacts under saturation
 #define HIGH_NUMBER 9999
 #define OWNED_ENTITY_SCORE_BIAS 1000000000.0f
 
 typedef struct {
     edict_t *edict;
     FLOAT score;
+    BOOL priority;
+    BOOL near_world;
 } visibleEntityCandidate_t;
 
 /* Determine whether a client should receive updates for the given entity.
@@ -70,18 +73,28 @@ static int SV_CompareCandidateByNumber(const void *a, const void *b) {
     return ea->edict->s.number - eb->edict->s.number;
 }
 
+/* Candidate heap root is the lowest-priority, farthest retained entity. */
+static BOOL SV_CandidateWorse(visibleEntityCandidate_t const *a, visibleEntityCandidate_t const *b) {
+    if (a->near_world != b->near_world) return !a->near_world;
+    if (a->priority != b->priority) return !a->priority;
+    return a->score > b->score;
+}
+
 /* Keep the worst retained candidate at the root so overflow replacement is logarithmic. */
 static void SV_AddVisibleEntityCandidate(visibleEntityCandidate_t *candidates,
                                          int *num_candidates,
                                          edict_t *edict,
-                                         FLOAT score)
+                                         FLOAT score,
+                                         BOOL priority,
+                                         BOOL near_world)
 {
+    visibleEntityCandidate_t candidate = { edict, score, priority, near_world };
     if (*num_candidates < MAX_PACKET_ENTITIES) {
         int index = (*num_candidates)++;
-        candidates[index] = (visibleEntityCandidate_t){ edict, score };
+        candidates[index] = candidate;
         while (index > 0) {
             int parent = (index - 1) / 2;
-            if (candidates[parent].score >= candidates[index].score)
+            if (!SV_CandidateWorse(&candidates[index], &candidates[parent]))
                 break;
             visibleEntityCandidate_t tmp = candidates[parent];
             candidates[parent] = candidates[index]; candidates[index] = tmp;
@@ -89,13 +102,13 @@ static void SV_AddVisibleEntityCandidate(visibleEntityCandidate_t *candidates,
         }
         return;
     }
-    if (score >= candidates[0].score)
+    if (!SV_CandidateWorse(&candidates[0], &candidate))
         return;
-    candidates[0] = (visibleEntityCandidate_t){ edict, score };
+    candidates[0] = candidate;
     for (int index = 0;;) {
         int left = index * 2 + 1, right = left + 1, worst = index;
-        if (left < *num_candidates && candidates[left].score > candidates[worst].score) worst = left;
-        if (right < *num_candidates && candidates[right].score > candidates[worst].score) worst = right;
+        if (left < *num_candidates && SV_CandidateWorse(&candidates[left], &candidates[worst])) worst = left;
+        if (right < *num_candidates && SV_CandidateWorse(&candidates[right], &candidates[worst])) worst = right;
         if (worst == index)
             break;
         visibleEntityCandidate_t tmp = candidates[index];
@@ -176,10 +189,16 @@ void SV_BuildClientFrame(LPCLIENT client) {
                                        !!(edict->svflags & SVF_NOCLIENT), !!edict->s.model,
                                        edict->s.origin.x, edict->s.origin.y);
 #endif
-        SV_AddVisibleEntityCandidate(candidates,
-                                     &num_candidates,
-                                     edict,
-                                     SV_ClientEntityVisibilityScore(client, edict));
+        {
+            BOOL const priority = ge->IsSnapshotPriorityEntity &&
+                ge->IsSnapshotPriorityEntity(clent->client->ps.number, edict);
+            BOOL const owned = edict->s.player == clent->client->ps.number;
+            BOOL const near_world = owned || (!priority &&
+                fabs(edict->s.origin.x - clent->client->ps.vieworigin.x) <= SNAPSHOT_NEAR_ENTITY_DISTANCE &&
+                fabs(edict->s.origin.y - clent->client->ps.vieworigin.y) <= SNAPSHOT_NEAR_ENTITY_DISTANCE);
+            SV_AddVisibleEntityCandidate(candidates, &num_candidates, edict,
+                                         SV_ClientEntityVisibilityScore(client, edict), priority, near_world);
+        }
     }
 
     qsort(candidates,
