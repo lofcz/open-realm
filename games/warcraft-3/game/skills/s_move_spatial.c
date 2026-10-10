@@ -53,6 +53,20 @@ void S_CompactMoveFineSpatial(void) {
 }
 
 wc3RegionCollection_t const *S_GetMoveRegions(uint32_t owner) {return &move_regions[owner].collection;}
+
+/*651590 toggles the current bridge then every current widget region. Re-read
+ * ownership at release; an inner pose publication may have replaced storage. */
+void S_ToggleUnitMoveExclusion(edict_t const *owner,bool on) {
+    if(!owner || !owner->inuse)return;
+    uint32_t index=owner-g_edicts;
+    wc3RecordObject_t *record=wc3_records_owned(&move_fine_spatial,index);
+    if(record)record->flags+=on ? 1u : UINT32_MAX;
+    wc3RegionCollection_t const *regions=&move_regions[index].collection;
+    FOR_LOOP(i,regions->count) {
+        record=wc3_records_object(&move_fine_spatial,regions->objects[i]);
+        if(record)record->flags+=on ? 1u : UINT32_MAX;
+    }
+}
 void S_GetMoveRegionState(uint32_t owner,moveRegionSave_t *out) {
     moveRegionState_t const *state=move_regions+owner;
     *out=(moveRegionSave_t){state->width,state->height,state->turn,state->published,

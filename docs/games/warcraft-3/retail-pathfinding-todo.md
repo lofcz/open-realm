@@ -56,6 +56,11 @@ work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
 **282 done / 336 tasks; 54 remaining.**
+Payoff257 integrates the independent nonstructure unit exclusion around Stop
+and replacement Move recovery, including all footprint regions. Two original
+read-only repeats preserve prior motion and scope expectations; actual engine
+footprint/save regressions cover caller depths0/3. MAP-04.2 retains its wider
+compositions. See [unit Stop scopes](retail-pathfinding-exclusions.md#unit-stop-excludes-its-footprint-regions-payoff257).
 Payoff256 closes TARGET-03.2 by joining all17 frozen loss policies and5
 reacquisition policies to production owner regressions. Paused point commands
 now create their fresh physical group on delayed resume, as both original

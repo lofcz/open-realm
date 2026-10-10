@@ -2205,6 +2205,10 @@ void S_RecoverStoppedUnitPosition(edict_t *self) {
 void S_StopUnitMovementWithRecovery(edict_t *self) {
     if(!self)return;
     G_PublishMoveSpatialObject(self);
+    /*69a840 holds the nonstructure unit's mover and widget regions around
+     *05ca50. This is separate from the bridge and170080 captured holds. */
+    bool unit_scope=!G_UnitIsStructure(self);
+    if(unit_scope)S_ToggleUnitMoveExclusion(self,true);
     wc3SpatialRecords_t *map=S_GetMoveFineSpatial();
     wc3RecordObject_t *record=map->objects ? wc3_records_owned(map,self-g_edicts) : NULL;
     bool held=record!=NULL;
@@ -2219,6 +2223,7 @@ void S_StopUnitMovementWithRecovery(edict_t *self) {
         record=wc3_records_owned(S_GetMoveFineSpatial(),self-g_edicts);
         if(record)record->flags--;
     }
+    if(unit_scope)S_ToggleUnitMoveExclusion(self,false);
 }
 
 /* Portal movement keeps the order, route buffers and current velocity. */

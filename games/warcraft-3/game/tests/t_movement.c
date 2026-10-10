@@ -21110,10 +21110,11 @@ static void stop247_stand(edict_t *unit) {
 static void stop247_recovery(void *data,unsigned stage,edict_t const *unit) {
     stop247Trace_t *trace=data;wc3RecordObject_t const *record=G_GetMoveSpatialObject(unit-g_edicts);
     T_EQ(stage,trace->stages++);T_NOT_NULL(record);
-    if(record)T_EQ(record->flags,trace->outer+1+((stage==1 || stage==2)?1:0));
+    if(record)T_EQ(record->flags,trace->outer+2+((stage==1 || stage==2)?1:0));
 }
 
-/* Both public Stop and replacement Move must complete the bridge's nested
+/* Public69a840 adds one unit hold to the frozen247 bridge-only kernel.
+ * Both public Stop and replacement Move must complete the bridge's nested
  * recovery before the next task/stand can observe the unit. Frozen positions
  * come from complete original code, with flat support level0 supplied. */
 TEST(wc3_movement, stop247_public_stop_and_move_recover_inside_outer_scope) {
@@ -23030,4 +23031,65 @@ TEST(wc3_movement, target256_order_during_fade_cancels_then_requires_explicit_re
     G_SetSLKRows("AbilityData",old);free_slk_rows(rows);G_FowShutdown();reset_entities();setup_test_world();
 }
 
+#endif
+
+#ifdef BZ_TESTS
+#include "../../common/wc3_pathing_regions.h"
+typedef struct {unsigned outer,stages;} stop257Trace_t;
+static void stop257_recovery(void *data,unsigned stage,edict_t const *unit) {
+    stop257Trace_t *trace=data;wc3SpatialRecords_t *map=S_GetMoveFineSpatial();
+    T_EQ(stage,trace->stages++);
+    T_EQ(wc3_records_owned(map,unit-g_edicts)->flags,trace->outer+2+((stage==1 || stage==2)?1:0));
+    wc3RegionCollection_t const *regions=S_GetMoveRegions(unit-g_edicts);
+    T_EQ(regions->count,4);
+    FOR_LOOP(i,regions->count)
+        T_EQ(wc3_records_object(map,regions->objects[i])->flags,WC3_RECORD_REGION+trace->outer+1);
+}
+
+/* The outer unit scope suppresses every footprint region as well as its
+ * mover. Self-owned pixels must not relocate an otherwise clear stopped unit.
+ * Capture257 verifies the independent unit scope;063d10 kernel covers lists. */
+TEST(wc3_movement, stop257_unit_scope_excludes_all_regions_after_save_and_restores_outer_depth) {
+    cstring_t file=Test_TempPath("wc3-stop257.bin");
+    FOR_LOOP(saved,2)FOR_LOOP(outer,2)FOR_LOOP(command,2) {
+        reset_entities();setup_test_world();uint8_t cells[64*64]={0};
+        CM_SetupTestWorldBounds(&(box2_t){{0,0},{2048,2048}});CM_SetupTestPathmap(64,64,cells);
+        T_ASSERT(run_test_jass("globals\nunit stopped257\nendglobals\n"
+            "function main takes nothing returns nothing\n"
+            "set stopped257=CreateUnit(Player(0),'hfoo',656,656,0)\nendfunction\n"));
+        edict_t *unit=NULL;FILTER_EDICTS(ent,ent->inuse && ent->class_id==MAKEFOURCC('h','f','o','o'))unit=ent;
+        T_NOT_NULL(unit);if(!unit)continue;
+        struct {uint16_t width,height;color32_t pixels[64];} texture={8,8};
+        FOR_LOOP(i,64)texture.pixels[i]=(color32_t){255,255,255,255};
+        unit->collision=8;G_PublishMoveSpatialObject(unit);
+        unit->pathtex=(pathTex_t *)&texture;S_PublishMoveRegions(unit);
+        wc3SpatialRecords_t *map=S_GetMoveFineSpatial();
+        wc3RegionCollection_t const *regions=S_GetMoveRegions(unit-g_edicts);
+        unsigned index=unit-g_edicts;
+        if(saved) {
+            T_ASSERT(WriteGame(file));unit->pathtex=NULL;
+            T_ASSERT(ReadGame(file));unit=g_edicts+index;
+        }
+        /* Exclusion depths belong to a synchronous caller, not a saved task.
+         * Establish the outer caller after the cold load has completed. */
+        map=S_GetMoveFineSpatial();regions=S_GetMoveRegions(index);
+        T_EQ(wc3_records_owned(map,index)->flags,0);
+        wc3_records_owned(map,index)->flags=outer*3;
+        FOR_LOOP(i,regions->count) {
+            T_EQ(wc3_records_object(map,regions->objects[i])->flags,WC3_RECORD_REGION);
+            wc3_records_object(map,regions->objects[i])->flags+=outer*3;
+        }
+        stop257Trace_t trace={outer*3,0};S_TestMoveRecoveryTrace(stop257_recovery,&trace);
+        if(command)T_ASSERT(unit_issueorder(unit,"move",&(vec2_t){1200,1200}));
+        else T_ASSERT(unit_issueimmediateorder(unit,"stop"));
+        S_TestMoveRecoveryTrace(NULL,NULL);T_EQ(trace.stages,4);
+        map=S_GetMoveFineSpatial();regions=S_GetMoveRegions(index);
+        T_EQ(wc3_records_owned(map,index)->flags,outer*3);
+        FOR_LOOP(i,regions->count)T_EQ(wc3_records_object(map,regions->objects[i])->flags,WC3_RECORD_REGION+outer*3);
+        T_EQ(wc3_float_bits(unit->s.origin2.x),wc3_float_bits(656));
+        T_EQ(wc3_float_bits(unit->s.origin2.y),wc3_float_bits(656));
+        unit->pathtex=NULL;
+    }
+    remove(file);reset_entities();setup_test_world();
+}
 #endif

@@ -534,3 +534,57 @@ captain and delayed-reconstruction publication, the independent unit exclusion
 and notification reentrancy are still separate MAP-04.2 work. See
 [canonical requests](retail-pathfinding-engine.md#canonical-point-requests-publish-physical-cohorts-only-at-readiness-payoff248)
 for evidence and save/event limits.
+
+## Unit Stop excludes its footprint regions (Payoff257)
+
+Ordinary nonstructure `69a840` holds `651590(1)` around the bridge recovery
+`05ca50`, then calls `651590(0)`. The unit wrapper resolves its canonical
+identity, requires tag `2b61676c` and live `+20`, toggles the mover through its
+current bridge, and then toggles every current widget region through `063d10`.
+Release resolves the current owners again. This is an independent scope around
+both the bridge hold and inner placement's captured-record hold.
+
+The engine now wraps its existing bridge recovery in this unit scope. The
+Move-owned operation walks only the existing mover and at most four region
+records; it allocates nothing and does not republish pixels or scan the map.
+Stop and replacement point Move therefore exclude their own footprint pixels
+while recovering, and restore all caller counters before exposing stand or the
+next task. The structure support branch and other notification producers retain
+their existing scope; this chunk does not infer their complete behavior.
+
+Two read-only Frida observations of the unchanged Work247 map preserve all14
+public markers and all111 normalized scope events each. Bridge entry observes
+counter2, inner footprint3, bridge release1, followed by the independent unit
+release. Removing the additional unit boundaries from each new trace reproduces
+the complete earlier Payoff247 event sequence exactly. Its earlier observer-free
+control is reused explicitly; no new control or original save is claimed.
+
+The original unit-wrapper kernel executes16 canonical-tag/liveness/list/depth
+cases and16 controls. Its supplied wrapper vtable points to original `6864d0`,
+which returns the embedded bridge at `+164`. Canonical unit tags and liveness
+are fixture inputs on original canonical allocations, not a claim that the
+original Unit factory ran. A separate complete `063d10` call proves null slots
+are skipped and aliased pointers increment once per occurrence.
+
+The new production regression uses four real rasterized footprint regions,
+Stop and replacement Move, outer depths0/3 and cold save/load. Before the fix,
+recovery can move a unit out of its own footprint and lacks the unit counters.
+Synchronous caller exclusions are established after loading; the save format
+correctly does not persist a live C-stack scope. Initial test attempts that
+saved such synthetic depths are retained as rejected harness evidence.
+
+No earlier retail fixture changes. Payoff247's engine-only public counter check
+now includes the newly recovered unit hold around its unchanged bridge-kernel
+position expectations. The old original-code kernel, header, live events and
+pause86 trajectory remain immutable. Ghidra saves five function notes and121
+instruction guards, mirrored in `MapPathfinding.java`.
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_work257.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/unit-stop257-fresh.json
+```
+
+Archive: `research/MAP-04.2/payoff257/` under the pathfinding reports root.
+MAP-04.2 stays open for the remaining canonical target-region, notification and
+public duplicate-cleanup compositions. No performance target is accepted here.
