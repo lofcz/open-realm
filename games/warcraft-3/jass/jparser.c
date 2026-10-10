@@ -267,10 +267,10 @@ wordExtractor_t(read_single_identifier) {
         left->args = read_single_identifier(p);
     } else if (eat_token(p, "(")) {
         left = parse_logical_expression(p);
-    } else if (is_integer(tok)) {
+    } else if (c_operators ? is_integer(tok) : jlex_number_kind(tok) == JLEX_INTEGER) {
         left = alloc_ident_token(p, TT_INTEGER);
         if (!c_operators) left->flags |= TF_RETAIL_NUMBER;
-    } else if (is_float(tok)) {
+    } else if (c_operators ? is_float(tok) : jlex_number_kind(tok) == JLEX_REAL) {
         left = alloc_ident_token(p, TT_REAL);
         if (!c_operators) left->flags |= TF_RETAIL_NUMBER;
     } else if (is_string(tok)) {
@@ -502,6 +502,7 @@ static parseClass_t global_keywords[] = {
 
 token_t *JASS_ParseTokens(wordExtractor_t *p) {
     c_operators = false;
+    p->retail_numbers = true;
     token_t *tokens = NULL;
     if (setjmp(exception_env) == 0) {
         token_t *token = NULL;
@@ -844,6 +845,7 @@ static token_t *galaxy_parse_global_or_func(wordExtractor_t *p) {
 
 token_t *GALAXY_ParseTokens(wordExtractor_t *p) {
     c_operators = true;
+    p->retail_numbers = false;
     token_t *tokens = NULL;
     if (setjmp(exception_env) == 0) {
         while (*peek_token(p)) {

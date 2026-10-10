@@ -320,14 +320,14 @@ TEST(wc3_api, pathfinding_compiled_literals_survive_save_load) {
     reset_entities();
 }
 
-/* Unrecovered host-only token syntax must not enter the verified decimal producer. */
-TEST(wc3_api, pathfinding_compiled_unverified_numeric_syntax_reports_error) {
+/* Payoff259 original source compilation replaces the old temporary host-number
+ * guard: these are identifiers when declared, while exponents remain invalid. */
+TEST(wc3_api, pathfinding_compiled_numeric_syntax_matches_retail_lexer) {
     setup_test_world();
     T_ASSERT(!run_test_jass("function main takes nothing returns nothing\n  local real value = 1e2\nendfunction\n"));
-    T_ASSERT(run_test_jass_error("function main takes nothing returns nothing\n  local real value = nan\nendfunction\n",
-        "Compiled real token outside verified retail decimal grammar"));
-    T_ASSERT(run_test_jass_error("function main takes nothing returns nothing\n  local real value = inf\nendfunction\n",
-        "Compiled real token outside verified retail decimal grammar"));
+    T_ASSERT(run_test_jass("function main takes nothing returns nothing\n"
+        "local real nan=11.\nlocal real inf=12.\nlocal real Infinity=13.\n"
+        "call BJassAssert(nan+inf+Infinity==36.,\"retail source identifiers\")\nendfunction\n"));
     T_ASSERT(run_test_jass("function main takes nothing returns nothing\n  call BJassAssert(.5 == 0.5, \"verified decimal syntax recovers\")\nendfunction\n"));
     reset_entities();
 }

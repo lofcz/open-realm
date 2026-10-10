@@ -1860,10 +1860,7 @@ uint32_t VM_EvalInteger(jass_t *j, token_t const *token) {
 
 uint32_t VM_EvalReal(jass_t *j, token_t const *token) {
     if (!(token->flags & TF_RETAIL_NUMBER)) return jass_pushnumber(j, atof(token->primary));
-    /* TODO: NUM-01.15 owns the full retail lexical domain. Host strtod accepts
-     * identifiers such as nan/inf; never feed those bytes into the decimal port. */
-    for (cstring_t p = token->primary; *p; p++) {
-        if ((*p >= '0' && *p <= '9') || *p == '.') continue;
+    if (jlex_number_kind(token->primary) != JLEX_REAL) {
         jass_rterror(j, "Compiled real token outside verified retail decimal grammar");
         return 0;
     }

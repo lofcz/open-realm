@@ -469,6 +469,7 @@ struct word_extractor {
     char const *delimiters;
     bool error;
     bool eat_quotes;
+    bool retail_numbers;
 };
 #endif
 

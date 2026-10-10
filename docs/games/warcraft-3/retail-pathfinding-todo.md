@@ -55,7 +55,13 @@ because they did not establish an overall performance win. This performance
 work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
-**282 done / 336 tasks; 54 remaining.**
+**283 done / 336 tasks; 53 remaining.**
+Payoff259 closes NUM-01.15 with the original16-state numeric DFA, repeated
+actual source compilation and engine JASS/Move regressions. Invalid octals now
+fail compilation; declared nan/inf/Infinity remain identifiers. Scalar and
+movement fixture expectations remain unchanged; Galaxy retains its own mode.
+See [numeric source boundaries](retail-pathfinding-engine.md#jass-numeric-source-boundaries-precede-scalar-conversion-payoff259).
+
 Payoff258 separates public structure Stop admission from internal null-callback
 support recovery, preserving task cancellation and path invalidation. Repeated
 retail four-form traces and an unhooked control confirm current-form gating and
@@ -1308,7 +1314,7 @@ Evidence: [numeric evidence][P] and [motion][M]. Tools/artifacts: numeric, speed
 - [ ] **NUM-01.14** Split01.2's nonreturning power VM lifetime: identify actual public script scheduling/watchdog/error behavior for reachable converted negative signed exponents with bounded process controls, then match the proven engine lifetime/error policy. Keep helper instruction-budget stops separate from VM evidence; no unbounded live script or fabricated numeric result.
 
 
-- [ ] **NUM-01.15** Split01.2's full source-number lexical grammar from the bounded decimal producer01.7: recover original9249d0 numeric DFA/token boundaries and nan/inf/exponent/point/hex-like acceptance or rejection through actual source compilation; preserve source-language distinctions and report invalid syntax in the engine. Current VM explicitly rejects host-strtod nondecimal real tokens instead of feeding unverified bytes into925260's port. Recover original constant-token storage/consumption beyond the verified lexer+24 slot where needed; do not infer full compiler equivalence from public native input words.
+- [x] **NUM-01.15** Split01.2's full source-number lexical grammar from the bounded decimal producer01.7: recover original9249d0 numeric DFA/token boundaries and nan/inf/exponent/point/hex-like acceptance or rejection through actual source compilation; preserve source-language distinctions and report invalid syntax in the engine. Recover original constant-token storage/consumption beyond the verified lexer+24 slot where needed; do not infer full compiler equivalence from public native input words. Evidence: [Payoff259](retail-pathfinding-engine.md#jass-numeric-source-boundaries-precede-scalar-conversion-payoff259), original16-state/4096-edge numeric DFA and5139 decisions, two valid source repeats/control and12 invalid-source pairs, actual engine Move/save regressions and preserved Galaxy mode. Full semantic compilation is explicitly outside this numeric-domain closure.
 - [x] **NUM-01.16** Split01.2's compiled integer producers925210/925490/925350: decimal/octal/hex lexical token108, ECX lexer/token lengthc4, hex prefix-length stack argument, signed32 accumulation and unary sign boundaries; capture actual oversized decimal/octal/hex constants and I2R native argument words, reproduce host-strtol width/saturation differences, and integrate verified JASS integer parsing while preserving Galaxy and save/load. Keep integer lexer evidence separate from real-token prefix wrapping01.7. Evidence: [compiled JASS integer words](retail-pathfinding-engine.md#compiled-jass-integer-words),16,080 original/model/C calls per-O0/-O2 with guarded token108 and exact digest3affdc0f; repeated44 actual I2R input/output pairs and42 compiler word/radix/prefix/caller observations. Nine engine word failures precede the port; all source/native words, Move/save-load and mixed-language policies pass. Unsigned unary subtraction retains INT_MIN wrapping. Saved340 names/104 prototypes and fresh146/146 corpus. Full invalid-token grammar remains01.15.
 
 - [ ] **NUM-01.17** Split01.12's basic arithmetic/conversion callers: classify reachable Add/Subtract/Multiply/Divide/reciprocal/sqrt/fractional/rounding/integer inputs and destinations, retain composed read/write order, and integrate any difference through Move. The original33-function xref inventory records6,898 references; name-only movement filtering is not reachability proof.

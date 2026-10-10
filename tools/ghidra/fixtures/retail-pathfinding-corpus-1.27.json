@@ -18,7 +18,7 @@
     "archive": "Local report root containing the frozen JSONL inputs.",
     "engine": "Fresh compiled wc3_pathing_engine_probe.c library."
   },
-  "scope": "213 executable original/evidence contracts;494 total entries.",
+  "scope": "214 executable original/evidence contracts;495 total entries.",
   "entries": [
     {
       "id": "oracle-adaptive",
@@ -51275,6 +51275,77 @@
         "Current-form engine checks use the existing Root ability fixture; no public duplicate callbacks or notification reentrancy are synthesized.",
         "No performance target or broader MAP-04.2 closure is claimed. Shared capture metadata retains the TARGET-03.2 runner label; map and sources pin this MAP-04.2 experiment."
       ]
+    },
+    {
+      "id": "oracle-numeric259",
+      "kind": "oracle",
+      "command": [
+        "{python}",
+        "tools/ghidra/verify_wc3_pathing_numeric259.py",
+        "--binary",
+        "{binary}",
+        "--report",
+        "{report}"
+      ],
+      "inputs": {
+        "binary_sha256": "d51e5680243fc90e19c9d6074f7fac433c466d3cf5f46e2364291725574d8236"
+      },
+      "report": "numeric259.json",
+      "expected_exit": 0,
+      "expected_status": "verified",
+      "checks": {
+        "passed": {
+          "equal": true
+        },
+        "original_cases": {
+          "equal": 5139
+        },
+        "numeric_states": {
+          "equal": 16
+        },
+        "dfa_edges": {
+          "equal": 4096
+        },
+        "engine_lexer_cases": {
+          "equal": 4872
+        },
+        "captures": {
+          "equal": 26
+        },
+        "controls": {
+          "equal": 1
+        },
+        "invalid_expressions": {
+          "equal": 12
+        },
+        "source_tokens": {
+          "equal": 828
+        },
+        "successful_compile_returns": {
+          "equal": 4
+        },
+        "public_markers": {
+          "equal": 6
+        },
+        "instructions": {
+          "equal": 2600
+        },
+        "engine": {
+          "length": 2
+        }
+      },
+      "evidence": [
+        "S",
+        "L"
+      ],
+      "scope": "Complete original numeric-prefix DFA, valid and invalid actual source compilation, JASS-only scanner and real engine Move/save regression.",
+      "exclusions": [
+        "Original DFA kernel adapts input/EOF and memmove only; complete numeric controls execute original conversion actions. Identifier interning is observed separately in real source compilation.",
+        "Invalid maps are accepted as evidence at the first original compile diagnostic, not successful parser return. Subsequent observer destruction and failed earlier capture attempts remain archived.",
+        "The valid probe exercises declared nan/inf/Infinity identifiers and numeric-to-Move production. General undefined-symbol resolution, full JASS semantic compilation and Galaxy grammar are not claimed retail-equivalent.",
+        "The finite DFA graph proves numeric language transitions. Engine source size/token limits and arbitrary malformed nonnumeric syntax are outside this numeric-domain closure.",
+        "Existing retail numeric scalar/conversion fixtures are unchanged. Replaced older engine-only nan/inf guard was explicitly provisional; no former retail literal or expected numeric word was edited."
+      ]
     }
   ],
   "fixtures": [
@@ -52173,7 +52244,7 @@
     },
     {
       "path": "tools/ghidra/MapPathfinding.java",
-      "sha256": "c23066fc60f40bc8436d14939fc051dbd9ae0c2c7036df747b098620c6452ec3"
+      "sha256": "81a815fd6066efde1de10f7d5c6de6b82bbce42fcf765be6c23221d9d1cea51c"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_metadata_busy_motion_119.h",
@@ -53965,7 +54036,7 @@
     },
     {
       "path": "tests/test_wc3_pathfinding_corpus.py",
-      "sha256": "f4fe723f78a047e42f0b4e8a2dd5c36f7b3fcf7ab06f79e8b86753c3eddce0d7"
+      "sha256": "36808d3f41870f2fb6e827b0e4ef0ddb11b0a6f67008feb4cb1bab690e4fd09a"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-group-speed.md",
@@ -53977,11 +54048,11 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-engine.md",
-      "sha256": "547632784593924e21f6714a9b31e0ffcc66a497531afd5ed665e0a2c9ee287f"
+      "sha256": "7d33f709ed67425b5bb532a006ced3b753e20a2d6705c2ecb725c855826bafa8"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-todo.md",
-      "sha256": "6d9e8f827d82dfa691404e886c2aa21bdc0896022b39ceffdfec9936a1c0d89e"
+      "sha256": "2cbdf4aed91e06e88d86ae2743e74589c3e5d214e1b9689806170a4675586f68"
     },
     {
       "path": "games/warcraft-3/game/g_timer.c",
@@ -54769,7 +54840,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_api.c",
-      "sha256": "ffa10d54aa0d9799376e943cbc8e0c3238fd784249b9df7be5bbec7b3f896fcf"
+      "sha256": "ef6498988a27bd962f00d747083d1fa1c32db8e57883ab3f7505f24ec7170cfb"
     },
     {
       "path": "games/warcraft-3/game/tests/t_collision.c",
@@ -54777,7 +54848,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_jass_map.c",
-      "sha256": "14e3cf2e0abba902d2e1c3132d9356c357793234db79dc209d8e3f4ec173623a"
+      "sha256": "8afdbdfe22392bbb582e05c4f4091214edf59bf1c6d1da1266853efcda530943"
     },
     {
       "path": "games/warcraft-3/game/tests/t_spell.c",
@@ -55125,7 +55196,7 @@
     },
     {
       "path": "games/warcraft-3/jass/jdo.c",
-      "sha256": "82a99db627f137aa6a9fd861d51d4d6d38fff2b1d9a1fd1622434f9a09e016f5"
+      "sha256": "c48048f5d138a7dbf1078412ea7c207467030d651e2b3d5d944de08e6e653be0"
     },
     {
       "path": "tools/ghidra/verify_wc3_pathing_order_subscriptions.py",
@@ -57890,6 +57961,50 @@
     {
       "path": "tests/test_wc3_pathfinding_work258.py",
       "sha256": "528c58a989728df84028edd98db5ae4ea2a5ebf9b12ff98cdabdba6c9624b6d5"
+    },
+    {
+      "path": "tools/ghidra/research/Numeric259Evidence.java",
+      "sha256": "19b7160ad2476123329544e3d511ea8705358a98026efaf0cf4d96fbb3fd7411"
+    },
+    {
+      "path": "tools/ghidra/research/lexer259_oracle.py",
+      "sha256": "8517c0b4f8249a8e3686482262ab0f0da1274213d6e842b5a8c75103a52c9c57"
+    },
+    {
+      "path": "tools/frida/research/numeric259_capture.py",
+      "sha256": "3c9f2b980be1f55e65dddea717cfc1dbadc1489917b1d886948107a98796d051"
+    },
+    {
+      "path": "tools/frida/research/numeric259_observer.js",
+      "sha256": "b9dffea62afc16ce9b35239205071f6aaba78fe40ffa41af967516e7ded66571"
+    },
+    {
+      "path": "tools/frida/research/numeric259_make_map.py",
+      "sha256": "6a168db8a5e52fbae8ce6c53ab0edea617b877cc27257ca897e859011c372c84"
+    },
+    {
+      "path": "tools/frida/research/numeric259_probe.j",
+      "sha256": "91fba7a88ca080427b1664c586a69b046ced48f0bc2dabf12c118679fd6f8a7c"
+    },
+    {
+      "path": "tools/ghidra/verify_wc3_pathing_numeric259.py",
+      "sha256": "95e8e27350558c67e65b7fa1548f916a3d7a3448514725a9b6e2e5378b796631"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-numeric259-1.27.json",
+      "sha256": "be26dfb555bab60293eb4122c5eb6d788f599abf48e73390a7739a91c7d15479"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-numeric259-1.27.json.gz",
+      "sha256": "9ae899330f5b28bc86ece456e53ef6b5a821e4539f933cff0dd9331c931bdea9"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-numeric259-1.27.h",
+      "sha256": "e390c03d503be17d1c8bee3f82343cbfbc498f805878ae91fb64a07892a9a2da"
+    },
+    {
+      "path": "tests/test_wc3_pathfinding_numeric259.py",
+      "sha256": "73596fe597b74d377ffc62dce9b8ac18b7a2f6bda576ad08c0a78584076e496a"
     }
   ]
 }

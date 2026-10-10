@@ -16050,3 +16050,78 @@ and an unhooked control agree on117 public markers; the original visibility
 bodies cover6,912 controlled cases, including576 literal engine policy rows.
 TARGET-03.1 closes; broader dynamic TARGET-03.2 remains open. See
 [policy producers, branch table and engine regressions](retail-pathfinding-target-visibility.md#visibility-policies-and-optional-target-admission-payoff251).
+
+## JASS numeric source boundaries precede scalar conversion (Payoff259)
+
+NUM-01.15 closes the numeric lexer domain with original code and actual source
+compilation. It does not claim complete JASS semantic compiler equivalence.
+The engine now uses a linear, locale-independent numeric prefix scanner and
+whole-token classification for JASS; Galaxy retains its existing parser mode.
+This fixes invalid octals being accepted as real values and declared identifiers
+such as `nan` being sent to the real-literal converter before Move commands.
+
+Original `9249d0` has 16 reachable numeric prefix states. Recovering every
+outgoing byte gives 4,096 transitions; 5,139 original first-token decisions
+repeat exactly, including complete parent/conversion controls for numeric tokens.
+The independent grammar checks the graph and token boundaries:
+
+| Numeric rule | Accepted form | Important boundary |
+|---|---|---|
+| Decimal integer | `[1-9][0-9]*` | `1e3` starts with integer `1` |
+| Octal integer | `0[0-7]*` | `078` starts with `07`, then `8` |
+| Dollar hexadecimal | `$[0-9a-fA-F]+` | `$G` starts with punctuation `$` |
+| Prefixed hexadecimal | `0[xX][0-9a-fA-F]+` | `0xG` starts with octal `0` |
+| Decimal real | digits with one point, at least one digit overall | `.5`, `1.`, `01.2`, `089.5` are real |
+
+Choose the longest accepted prefix. In particular, scanning octal digits first
+and rejecting the rest would incorrectly reject `089.5`; the point extends the
+full decimal digit sequence. Exponent and hexadecimal floating forms have no
+numeric rule. `nan`, `inf`, `NaN` and `Infinity` enter identifier action41;
+`9253e0` refines identifier tokens according to declaration/reference context.
+
+Two read-only runs of a real map compile declared `nan`, `inf` and `Infinity`
+variables, evaluate a mixed-radix expression to `378.5`, and submit that value
+through public Move. Each map performs two successful original compilation
+passes, returning zero with lexer error flag zero. An unhooked control agrees
+on both public markers and final unit coordinates. The observed source-token
+streams agree exactly (414 tokens per run). Preload files contain unrelated
+asset/timing differences; their original bytes remain retained and hashed.
+
+Twelve separate invalid expression maps (`078`, `08`, `09`, `0x`, `0xG`, `$`,
+`$G`, `1e3`, `1.2e3`, `0x1p4`, `1.2.3`, `.`) repeat compiler diagnostics twice
+without completing the probe. Rejection is observed at original `925500`, whose
+body writes lexer error flag `+8c` and calls its configured diagnostic callback.
+These are diagnostic completion boundaries, not successful parser returns.
+When retail error handling destroys the observer, the capture explicitly records
+that RPC is unavailable after the diagnostic. Earlier failed capture attempts
+are archived separately and are not included in accepted counts.
+
+The original parser `922a50` retains its lexer at `+44`, copies lexer `+24`
+into lookahead value `+1c`, shifts through `+20`, and stores that word onto its
+semantic stack. Saved Ghidra annotations, an explicit partial parser structure,
+2,600 instruction guards and caller references preserve this recovered flow.
+No p-code substitution or public native argument inference supplies these facts.
+
+The corrected failing-first engine harness initially passes 39/49 assertions:
+three invalid octals are accepted and the declared-identifier Move producer
+fails. After the port, 4,872 original first-token cases, actual source/Move and
+JASS save/coroutine neighbors pass: 82 tests and 15,417 assertions per Classic
+and TFT. All 105 Galaxy tests (193 assertions) and JASS header dependency checks
+also pass. Ten evidence regression checks reject incomplete or altered inputs.
+The older engine-only `nan`/`inf` runtime guard was explicitly provisional;
+its test now exercises retail-proven declared identifiers. No existing retail
+literal, scalar-conversion word or movement fixture was rewritten.
+
+General undefined-symbol resolution, arbitrary malformed nonnumeric syntax,
+source/token capacity limits and complete JASS semantic compilation remain
+outside this numeric-domain claim. The port preserves the existing decimal and
+integer conversion implementations and save representation. No frame-time gain
+is claimed for this correctness change.
+
+Evidence: [frozen contract](../../../tools/ghidra/fixtures/retail-numeric259-1.27.json),
+[original lexer oracle](../../../tools/ghidra/research/lexer259_oracle.py),
+[strict verifier](../../../tools/ghidra/verify_wc3_pathing_numeric259.py),
+[read-only observer](../../../tools/frida/research/numeric259_observer.js), and
+[replayable Ghidra annotations](../../../tools/ghidra/research/Numeric259Evidence.java).
+The complete owned archive is
+`/GitHub/wc3-analysis/reports/pathfinding-1.27/research/NUM-01.15/payoff259/`.

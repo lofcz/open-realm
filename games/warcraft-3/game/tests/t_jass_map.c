@@ -1795,3 +1795,51 @@ TEST(wc3_jass_map, neutral_remove_records_result_without_victory_or_defeat_event
 }
 
 #endif /* BZ_TESTS */
+
+#ifdef BZ_TESTS
+/* Original9249d0 selects identifiers before numeric conversion. Host strtod
+ * accepts these names, but they remain ordinary variables in retail source. */
+TEST(wc3_jass_map, numeric259_nonfinite_names_are_identifiers_in_actual_move_source) {
+    reset_entities();setup_test_world();
+    T_ASSERT(run_test_jass(
+        "function N259Boundary takes nothing returns real\n"
+        "local real nan=11.\nlocal real inf=12.\nlocal real Infinity=13.\n"
+        "return nan+inf+Infinity+089.5+I2R(077)+I2R(0Xf)+I2R($aF)\nendfunction\n"
+        "function main takes nothing returns nothing\nlocal real value=N259Boundary()\n"
+        "local unit u=CreateUnit(Player(0),'hfoo',512,512,0)\n"
+        "call BJassAssert(value==378.5,\"retail identifier and numeric words\")\n"
+        "call BJassAssert(IssuePointOrder(u,\"move\",512+value,512),\"numeric Move producer\")\n"
+        "endfunction\n"));
+    reset_entities();setup_test_world();
+}
+
+TEST(wc3_jass_map, numeric259_invalid_numeric_boundaries_fail_source_compilation) {
+    cstring_t cases[]={"078","08","09","0x","0xG","$","$G","1e3","1.2e3","0x1p4","1.2.3","."};
+    FOR_LOOP(i,sizeof(cases)/sizeof(*cases)) {
+        char source[512];snprintf(source,sizeof(source),
+            "function N259Boundary takes nothing returns real\nlocal real value=%s\nreturn value\nendfunction\n"
+            "function main takes nothing returns nothing\nendfunction\n",cases[i]);
+        T_ASSERT(run_test_jass("function main takes nothing returns nothing\nendfunction\n"));
+        T_ASSERT(!jass_dobuffer(level.vm,source));
+        T_ASSERT(jass_rterror_pending(level.vm));
+        T_STREQ(jass_rterror_message(level.vm),"parse error");
+    }
+}
+#include "../../../../tools/ghidra/fixtures/retail-numeric259-1.27.h"
+
+TEST(wc3_jass_map, numeric259_first_tokens_match_original_dfa) {
+    FOR_LOOP(i, sizeof(numeric259_tokens) / sizeof(*numeric259_tokens)) {
+        wordExtractor_t parser = {
+            .buffer = numeric259_tokens[i].source,
+            .start = numeric259_tokens[i].source,
+            .delimiters = ",;()[]+-/*=<>!",
+            .retail_numbers = true
+        };
+        cstring_t token = jlex_parse_token(&parser);
+        T_STREQ(token, numeric259_tokens[i].token);
+        T_EQ(jlex_number_kind(token), numeric259_tokens[i].kind);
+        T_EQ(parser.buffer - parser.start, strlen(numeric259_tokens[i].token));
+    }
+}
+
+#endif
