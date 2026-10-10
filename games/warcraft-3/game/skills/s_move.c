@@ -5090,9 +5090,7 @@ static bool move_queued_cohort_candidate(void *data,edict_t *other) {
 
 static queuedOrderResult_t move_start_queued_group(edict_t *unit, unitOrder_t const *queued) {
     if (!queued->owner_context || queued->target_type!=UNIT_ORDER_TARGET_POINT) return QUEUED_ORDER_UNHANDLED;
-    uint32_t spawn=unit->spawn_time,group=unit->movement.group_id;
-    umove_t const *previous_move=unit->currentmove;
-    edict_t *previous_goal=unit->goalentity;
+    uint32_t spawn=unit->spawn_time,revision=G_UnitMoveRevision(unit);
     unit->current_order_id=queued->order_id;
     /*67abe0 publishes the user head before constructing its internal task.
      * A nested command cannot borrow the outer packet's prepared request. */
@@ -5102,8 +5100,7 @@ static queuedOrderResult_t move_start_queued_group(edict_t *unit, unitOrder_t co
     move_group_admission=admission;
     if(!unit->inuse || unit->spawn_time!=spawn || G_IsDeferredFree(unit) || M_IsDead(unit))
         return QUEUED_ORDER_REPLACED;
-    if(G_UnitHasActiveOrder(unit) && (unit->currentmove!=previous_move ||
-            unit->goalentity!=previous_goal || unit->movement.group_id!=group))
+    if(G_UnitHasActiveOrder(unit) && G_UnitMoveRevision(unit)!=revision)
         return QUEUED_ORDER_REPLACED;
     /* An instantaneous Stop leaves no internal task. Retail resumes the outer
      * Move task even though Stop has already retired its public user head. */

@@ -368,14 +368,18 @@ TEST(wc3_order_lifecycle, pool192_empty_queues_release_storage_and_reuse_lifo) {
     reset_entities(); setup_test_world();
 }
 
-TEST(wc3_order_lifecycle, pool192_discarded_target_and_replacement_release_storage) {
+TEST(wc3_order_lifecycle, pool192_lost_target_fallback_and_replacement_release_storage) {
     reset_entities(); setup_test_world();
     edict_t *unit = review_order_unit(0, 0), *target = review_order_unit(256, 1);
     vec2_t point = {512, 0};
     T_ASSERT(G_QueueUnitOrder(unit, "attack", UNIT_ORDER_TARGET_ENTITY, NULL, target, 0, 0, 0));
     T_NOT_NULL(unit->order_queue.entries);
     target->spawn_time++;
-    T_ASSERT(!G_UnitStartNextQueuedOrder(unit));
+    /* Payoff263:67abe0's unresolved target follows the point branch. Attack
+     * Move survives a lost identity; only its queue backing is reclaimed. */
+    T_ASSERT(G_UnitStartNextQueuedOrder(unit));
+    T_NOT_NULL(unit->movement.attackmove_waypoint);
+    if(unit->movement.attackmove_waypoint)T_FEQ(unit->movement.attackmove_waypoint->s.origin2.x,256,0);
     T_NULL(unit->order_queue.entries);
     T_ASSERT(G_QueueUnitOrder(unit, "holdposition", UNIT_ORDER_TARGET_NONE, NULL, NULL, 0, 0, 0));
     T_ASSERT(G_IssueUnitPointOrder(unit, "move", &point, false, 0, 0));
@@ -1270,6 +1274,170 @@ TEST(wc3_order_lifecycle, guard255_periodic_poll_retains_serial_and_catches_up_i
         T_FEQ(units[i]->attack_guard.timer.deadline.time,18,0);
     }
     reset_entities();setup_test_world();
+}
+
+/*67abe0 publishes the new user head before its internal task. Busy693490
+ * only retains the packet; native Shift captures are in Queue263. */
+static unsigned queue263_points;
+static uint32_t queue263_head;
+static vec2_t queue263_point;
+void G_TestIssuedPointObserver(void (*observer)(edict_t *));
+static void queue263_point_event(edict_t *unit) {
+    queue263_points++;
+    queue263_head=unit->current_order_id;
+    T_ASSERT(G_GetIssuedOrderPoint(unit,&queue263_point));
+}
+static edict_t *queue263_setup(void) {
+    reset_entities();setup_test_world();
+    uint8_t cells[128*128]={0};CM_SetupTestPathmap(128,128,cells);
+    CM_SetupTestWorldBounds(&(box2_t){{0,0},{4096,4096}});
+    edict_t *client=alloc_test_unit(0,0,0);
+    client->client=game.clients;client->client->ps.number=0;
+    edict_t *unit=review_order_unit(512,0);unit->s.origin2.y=512;gi.LinkEntity(unit);
+    T_ASSERT(unit_issueorder(unit,"move",&(vec2_t){512,1800}));
+    queue263_points=queue263_head=0;
+    G_TestIssuedPointObserver(queue263_point_event);
+    return unit;
+}
+static void queue263_close(void) {
+    G_TestIssuedPointObserver(NULL);reset_entities();setup_test_world();
+}
+TEST(wc3_order_lifecycle, queue263_generic_point_event_belongs_to_activation_and_save) {
+    FOR_LOOP(saved,2) {
+        edict_t *unit=queue263_setup();
+        vec2_t point={1024,512};
+        T_ASSERT(G_IssueUnitPointOrder(unit,"attack",&point,true,0,0));
+        T_EQ(queue263_points,0);T_EQ(unit->current_order_id,G_OrderId("move"));
+        T_EQ(unit->order_queue.count,1);
+        if(saved) {
+            cstring_t file=Test_TempPath("wc3-queue263-point.bin");
+            T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+        }
+        unit_stand(unit);
+        T_EQ(queue263_points,1);T_EQ(queue263_head,G_OrderId("attack"));
+        T_FEQ(queue263_point.x,point.x,0);T_FEQ(queue263_point.y,point.y,0);
+        T_EQ(unit->current_order_id,G_OrderId("attack"));
+        T_EQ(unit->order_queue.count,0);T_NULL(unit->order_queue.entries);
+        T_NOT_NULL(unit->movement.attackmove_waypoint);
+        queue263_close();
+    }
+}
+TEST(wc3_order_lifecycle, queue263_removed_attack_target_uses_retained_point_and_generation) {
+    FOR_LOOP(reuse,2)FOR_LOOP(saved,2) {
+        edict_t *unit=queue263_setup(),*target=review_order_unit(1024,1);
+        target->s.origin2.y=512;gi.LinkEntity(target);
+        target->spawn_time=777;
+        T_ASSERT(G_IssueUnitTargetOrder(unit,"attack",target,true,0));
+        T_EQ(queue263_points,0);T_EQ(unit->order_queue.count,1);
+        if(reuse)target->spawn_time++;else G_DeferFreeEdict(target);
+        if(saved) {
+            cstring_t file=Test_TempPath("wc3-queue263-target.bin");
+            T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+        }
+        unit_stand(unit);
+        T_EQ(queue263_points,1);T_EQ(queue263_head,G_OrderId("attack"));
+        T_FEQ(queue263_point.x,1024,0);T_FEQ(queue263_point.y,512,0);
+        T_EQ(unit->current_order_id,G_OrderId("attack"));
+        T_NULL(unit->movement.follow_target);T_NOT_NULL(unit->movement.attackmove_waypoint);
+        T_EQ(unit->order_queue.count,0);T_NULL(unit->order_queue.entries);
+        queue263_close();
+    }
+}
+TEST(wc3_order_lifecycle, queue263_empty_and_canceled_queue_do_not_publish_pending_orders) {
+    edict_t *unit=queue263_setup();
+    T_ASSERT(!G_UnitStartNextQueuedOrder(unit));T_EQ(queue263_points,0);
+    T_EQ(unit->order_queue.count,0);T_NULL(unit->order_queue.entries);
+    T_ASSERT(G_IssueUnitPointOrder(unit,"attack",&(vec2_t){1024,512},true,0,0));
+    T_ASSERT(G_IssueUnitPointOrder(unit,"move",&(vec2_t){1536,512},true,0,0));
+    T_EQ(queue263_points,0);T_EQ(unit->order_queue.count,2);
+    order_stop(unit);
+    T_EQ(queue263_points,0);T_EQ(unit->order_queue.count,0);T_NULL(unit->order_queue.entries);
+    T_ASSERT(!G_UnitStartNextQueuedOrder(unit));T_EQ(queue263_points,0);
+    queue263_close();
+}
+
+TEST(wc3_order_lifecycle, queue263_live_target_event_waits_for_activation) {
+    edict_t *unit=queue263_setup(),*target=review_order_unit(1024,1);
+    target->user_data=264;
+    T_ASSERT(run_test_jass("globals\ntrigger listener\ninteger visits=0\nendglobals\n"
+        "function issued takes nothing returns nothing\nset visits=visits+1\n"
+        "call BJassAssert(GetUnitCurrentOrder(GetTriggerUnit())==OrderId(\"attack\"),\"new target head before task\")\n"
+        "call BJassAssert(GetUnitUserData(GetOrderTargetUnit())==264,\"retained target payload\")\nendfunction\n"
+        "function zero takes nothing returns nothing\ncall BJassAssert(visits==0,\"no issued event at append\")\nendfunction\n"
+        "function one takes nothing returns nothing\ncall BJassAssert(visits==1,\"one activation event\")\nendfunction\n"
+        "function close takes nothing returns nothing\ncall DestroyTrigger(listener)\nendfunction\n"
+        "function main takes nothing returns nothing\nset listener=CreateTrigger()\n"
+        "call TriggerRegisterPlayerUnitEvent(listener,Player(0),ConvertPlayerUnitEvent(40),null)\n"
+        "call TriggerAddAction(listener,function issued)\nendfunction\n"));
+    T_ASSERT(G_IssueUnitTargetOrder(unit,"attack",target,true,0));
+    jass_callbyname(level.vm,"zero",false);
+    unit_stand(unit);jass_callbyname(level.vm,"one",false);
+    T_EQ(unit->current_order_id,G_OrderId("attack"));T_EQ(unit->goalentity,target);
+    T_EQ(queue263_points,0);T_EQ(unit->order_queue.count,0);T_NULL(unit->order_queue.entries);
+    jass_callbyname(level.vm,"close",false);queue263_close();
+}
+TEST(wc3_order_lifecycle, queue263_callback_replacement_stop_and_removal_keep_task_ownership) {
+    FOR_LOOP(mode,3) {
+        edict_t *unit=queue263_setup();char script[3072];
+        snprintf(script,sizeof(script),
+            "globals\ntrigger listener\nboolean entered=false\ninteger visits=0\nendglobals\n"
+            "function issued takes nothing returns nothing\nset visits=visits+1\n"
+            "if not entered then\nset entered=true\n"
+            "call BJassAssert(GetUnitCurrentOrder(GetTriggerUnit())==OrderId(\"attack\"),\"outer head before task\")\n"
+            "%s\nendif\nendfunction\n"
+            "function verify takes nothing returns nothing\ncall BJassAssert(entered and visits==%u,\"activation callback count\")\nendfunction\n"
+            "function close takes nothing returns nothing\ncall DestroyTrigger(listener)\nendfunction\n"
+            "function main takes nothing returns nothing\nset listener=CreateTrigger()\n"
+            "call TriggerRegisterPlayerUnitEvent(listener,Player(0),EVENT_PLAYER_UNIT_ISSUED_POINT_ORDER,null)\n"
+            "call TriggerAddAction(listener,function issued)\nendfunction\n",
+            mode==0 ? "call IssuePointOrder(GetTriggerUnit(),\"move\",2000.0,1200.0)" :
+            mode==1 ? "call IssueImmediateOrder(GetTriggerUnit(),\"stop\")" : "call RemoveUnit(GetTriggerUnit())",
+            mode==0 ? 2u : 1u);
+        T_ASSERT(run_test_jass(script));
+        T_ASSERT(G_IssueUnitPointOrder(unit,"attack",&(vec2_t){1024,512},true,0,0));
+        T_EQ(queue263_points,0);
+        unit_stand(unit);jass_callbyname(level.vm,"verify",false);
+        if(mode==0) {
+            T_EQ(unit->current_order_id,G_OrderId("move"));T_NULL(unit->movement.attackmove_waypoint);
+            T_NOT_NULL(unit->goalentity);
+            if(unit->goalentity)T_FEQ(unit->goalentity->s.origin2.x,2000,0);
+        } else if(mode==1) {
+            T_EQ(unit->current_order_id,0);T_NOT_NULL(unit->movement.attackmove_waypoint);
+            T_NOT_NULL(unit->goalentity);
+        } else {T_ASSERT(G_IsDeferredFree(unit));T_NULL(unit->movement.attackmove_waypoint);}
+        T_EQ(unit->order_queue.count,0);T_NULL(unit->order_queue.entries);
+        jass_callbyname(level.vm,"close",false);queue263_close();
+    }
+}
+TEST(wc3_order_lifecycle, queue263_rejected_successor_publishes_then_advances_without_leaking_storage) {
+    FOR_LOOP(saved,2) {
+        edict_t *unit=queue263_setup();
+        /* A retired Repair target cannot produce a repair task. The next
+         * user head still activates synchronously through the common loop. */
+        edict_t *target=review_order_unit(1024,0);
+        T_ASSERT(G_QueueUnitOrder(unit,"repair",UNIT_ORDER_TARGET_ENTITY,NULL,target,0,0,0));
+        T_ASSERT(G_IssueUnitPointOrder(unit,"move",&(vec2_t){1536,512},true,0,0));
+        G_DeferFreeEdict(target);
+        if(saved) {
+            cstring_t file=Test_TempPath("wc3-queue263-rejected.bin");
+            T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+        }
+        T_EQ(queue263_points,0);unit_stand(unit);
+        T_EQ(queue263_points,2);T_EQ(queue263_head,G_OrderId("move"));
+        T_EQ(unit->current_order_id,G_OrderId("move"));T_NOT_NULL(unit->goalentity);
+        T_EQ(unit->order_queue.count,0);T_NULL(unit->order_queue.entries);
+        queue263_close();
+    }
+}
+
+TEST(wc3_order_lifecycle, queue263_direct_append_resolves_optional_user_order_id) {
+    edict_t *unit=queue263_setup();
+    unitOrder_t queued={.target_type=UNIT_ORDER_TARGET_POINT,.point={1024,512}};
+    strlcpy(queued.order,"move",sizeof(queued.order));
+    T_ASSERT(G_AppendUnitOrder(unit,&queued));T_EQ(queue263_points,0);
+    unit_stand(unit);T_EQ(queue263_points,1);T_EQ(queue263_head,G_OrderId("move"));
+    T_EQ(unit->current_order_id,G_OrderId("move"));T_NULL(unit->order_queue.entries);
+    queue263_close();
 }
 
 #endif

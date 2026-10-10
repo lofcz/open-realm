@@ -19,7 +19,15 @@ static bool unit_is_active_repair_move(edict_t *self) {
     return handler && self->currentmove->proc == handler->proc;
 }
 
+/* Process-local task transition stamps are compared only across synchronous
+ * issued callbacks. They carry no simulation state across a frame or save. */
+static uint32_t unit_move_revisions[MAX_ENTITIES];
+uint32_t G_UnitMoveRevision(edict_t const *self) {
+    return self && self->s.number<MAX_ENTITIES ? unit_move_revisions[self->s.number] : 0;
+}
+
 void unit_setmove(edict_t *self, umove_t *move) {
+    if(self->s.number<MAX_ENTITIES)unit_move_revisions[self->s.number]++;
     bool was_idle = G_UnitIsIdleWorker(self);
     bool const was_standing = self->currentmove && self->currentmove->think == ai_stand;
 

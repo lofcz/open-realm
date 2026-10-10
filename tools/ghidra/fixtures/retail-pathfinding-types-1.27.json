@@ -18050,6 +18050,25 @@
           "storage": 4
         }
       ]
+    },
+    {
+      "address": "6f67d2b0",
+      "name": "Unit_FireIssuedTargetOrderEvent",
+      "returns": "void",
+      "convention": "__thiscall",
+      "evidence": "Payoff263: complete instruction body; ECX saved67d2db, stack4 loaded67d2e0, RET4 at67d4d3. Target8024d/player80228 subscription snapshots and retained target event payload. Repeated read-only Shift Attack control plus unresolved Attack/Repair point-event alternatives.",
+      "parameters": [
+        {
+          "name": "unit",
+          "type": "ptr:WC3UnitOrdersPrefix",
+          "storage": "ECX"
+        },
+        {
+          "name": "order",
+          "type": "ptr:WC3OrderTargetPrefix",
+          "storage": 4
+        }
+      ]
     }
   ],
   "globals": [

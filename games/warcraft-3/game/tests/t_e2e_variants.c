@@ -169,7 +169,7 @@ static void wc3_spatial_load_target_observation_changes_with_rebuilt_cell_order_
 static void wc3_spatial_load_four_active_routes_resume_word_identically_fn(void);
 static void wc3_proximity_save_load_rebuilds_proximity_in_save_order_fn(void);
 static void wc3_order_lifecycle_pool192_empty_queues_release_storage_and_reuse_lifo_fn(void);
-static void wc3_order_lifecycle_pool192_discarded_target_and_replacement_release_storage_fn(void);
+static void wc3_order_lifecycle_pool192_lost_target_fallback_and_replacement_release_storage_fn(void);
 static void wc3_order_lifecycle_queue198_wrapped_growth_preserves_commands_and_reset_releases_storage_fn(void);
 static void wc3_movement_shared189_captain_pool_growth_radius_departure_and_saved_reuse_fn(void);
 
@@ -192,7 +192,7 @@ TEST(wc3_e2e213, removal_and_spell_callbacks_retire_old_owners_and_keep_successo
 TEST(wc3_e2e213, queue_and_shared_pool_pressure_keep_saved_payloads_and_reuse) {
     FOR_LOOP(repeat,2) {
         e2e_journey(wc3_order_lifecycle_pool192_empty_queues_release_storage_and_reuse_lifo_fn);
-        e2e_journey(wc3_order_lifecycle_pool192_discarded_target_and_replacement_release_storage_fn);
+        e2e_journey(wc3_order_lifecycle_pool192_lost_target_fallback_and_replacement_release_storage_fn);
         e2e_journey(wc3_order_lifecycle_queue198_wrapped_growth_preserves_commands_and_reset_releases_storage_fn);
         e2e_journey(wc3_movement_shared189_captain_pool_growth_radius_departure_and_saved_reuse_fn);
     }

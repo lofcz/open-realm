@@ -1000,6 +1000,7 @@ static bool unit_issueorder_now(edict_t *self, cstring_t order, vec2_t const *po
         self->movement.group_speed = group_speed;
         return true;
     }
+    if (strcmp(order,"attack") && strcmp(order,"patrol")) return false;
     target = *point;
     pathAccelParams_t query = { point, NULL, self->collision, M_UnitStaticPathingFlags(self) };
     G_ClosestMovePathPoint(&query, &target);
@@ -1106,7 +1107,6 @@ bool G_IssueUnitTargetOrder(edict_t *self, cstring_t order, edict_t *target,
     if (queue && G_UnitHasActiveOrder(self)) {
         bool const accepted = G_QueueUnitOrder(self, order, UNIT_ORDER_TARGET_ENTITY, &point, target,
                                                issuer_player, 0.0f, 0);
-        if (accepted) unit_publish_target_order(self, order, target, issuer_player);
         return accepted;
     }
     if (!queue) G_ClearUnitOrderQueue(self);
@@ -1174,10 +1174,6 @@ bool G_IssueUnitPointOrder(edict_t *self, cstring_t order, vec2_t const *point,
     if (queue && G_UnitHasActiveOrder(self)) {
         bool const accepted = G_QueueUnitOrder(self, order, UNIT_ORDER_TARGET_POINT, point, NULL,
                                                issuer_player, group_speed, 0);
-        if (accepted) {
-            G_PublishIssuedPointOrder(self, unit_order_event_id(order), point,
-                                      issuer_player, order);
-        }
         return accepted;
     }
     if (!queue) G_ClearUnitOrderQueue(self);
@@ -1190,6 +1186,39 @@ bool G_IssueUnitPointOrder(edict_t *self, cstring_t order, vec2_t const *point,
         }
         return accepted;
     }
+}
+
+/* Resolve again after callbacks: a target can be removed or its edict reused
+ * while the immutable queued packet remains on this dispatch's stack. */
+static edict_t *unit_queued_target(unitOrder_t const *queued) {
+    if(queued->target_number>=globals.num_edicts)return NULL;
+    edict_t *target=globals.edicts+queued->target_number;
+    return target->inuse && !G_IsDeferredFree(target) &&
+        target->spawn_time==queued->target_spawn_time ? target : NULL;
+}
+
+static queuedOrderResult_t unit_execute_queued_order(edict_t *self,unitOrder_t const *queued) {
+    if(queued->target_type==UNIT_ORDER_TARGET_POINT)
+        return unit_issueorder_now(self,queued->order,&queued->point,queued->group_speed) ? QUEUED_ORDER_STARTED : QUEUED_ORDER_UNHANDLED;
+    if(queued->target_type==UNIT_ORDER_TARGET_ENTITY) {
+        /* Move owns visibility and its retained-point fallback. Other owners
+         * see the same original target-or-point dispatch shape (67abe0). */
+        queuedOrderResult_t result=S_UnitQueuedOrderEvent(self,queued,A_QUEUE_ORDER_START);
+        if(result!=QUEUED_ORDER_UNHANDLED)return result;
+        edict_t *target=unit_queued_target(queued);
+        /* Unhandled non-unit widgets retain their existing target policy.
+         * Their owner can supply a fallback above; the generic unit fallback
+         * must not manufacture widget movement from an unsupported packet. */
+        if(!target && !queued->target_is_unit)return QUEUED_ORDER_UNHANDLED;
+        bool accepted=target ? unit_issuetargetorder_now(self,queued->order,target) :
+            unit_issueorder_now(self,queued->order,&queued->point,queued->group_speed);
+        return accepted ? QUEUED_ORDER_STARTED : QUEUED_ORDER_UNHANDLED;
+    }
+    if(queued->target_type==UNIT_ORDER_TARGET_NONE) {
+        if(!strcmp(queued->order,"stop")) {order_stop_queued(self);return QUEUED_ORDER_STARTED;}
+        if(!strcmp(queued->order,"holdposition"))return S_HoldPositionQueued(self) ? QUEUED_ORDER_STARTED : QUEUED_ORDER_UNHANDLED;
+    }
+    return S_UnitQueuedOrderEvent(self,queued,A_QUEUE_ORDER_START);
 }
 
 bool G_UnitStartNextQueuedOrder(edict_t *self) {
@@ -1205,37 +1234,35 @@ bool G_UnitStartNextQueuedOrder(edict_t *self) {
             }
             continue;
         }
-        if (queued.target_type == UNIT_ORDER_TARGET_POINT) {
-            if (unit_issueorder_now(self, queued.order, &queued.point, queued.group_speed)) {
-                S_UnitAbilityOrderAccepted(self, queued.order);
-                return true;
-            }
-        } else if (queued.target_type == UNIT_ORDER_TARGET_ENTITY) {
-            /* Resolve ability-specific fallback before generic lifetime
-             * rejection: Move retains a point even after its target is gone. */
-            queuedOrderResult_t result=S_UnitQueuedOrderEvent(self,&queued,A_QUEUE_ORDER_START);
-            if (result!=QUEUED_ORDER_UNHANDLED) {
-                if(result==QUEUED_ORDER_STARTED)S_UnitAbilityOrderAccepted(self,queued.order);
-                return true;
-            }
-            edict_t *target;
-            if (queued.target_number >= globals.num_edicts) continue;
-            target = globals.edicts + queued.target_number;
-            if (!target->inuse || G_IsDeferredFree(target) || target->spawn_time != queued.target_spawn_time) continue;
-            if (unit_issuetargetorder_now(self, queued.order, target)) {
-                S_UnitAbilityOrderAccepted(self, queued.order);
-                return true;
-            }
-        } else if (queued.target_type == UNIT_ORDER_TARGET_NONE) {
-            if (!strcmp(queued.order, "stop")) {
-                order_stop_queued(self);
-                return true;
-            }
-            if (!strcmp(queued.order, "holdposition")) {
-                return S_HoldPositionQueued(self);
-            }
-            if (S_UnitQueuedOrderEvent(self, &queued, A_QUEUE_ORDER_START)) return true;
-        } else if (S_UnitQueuedOrderEvent(self, &queued, A_QUEUE_ORDER_START)) return true;
+        if(!queued.order_id)queued.order_id=unit_order_event_id(queued.order);
+        uint32_t const spawn=self->spawn_time,revision=G_UnitMoveRevision(self);
+        self->current_order_id=queued.order_id;
+        /* Busy693490 appends without notification.67abe0 publishes the new
+         * user head before its task, including a lost target's point event. */
+        if(queued.target_type==UNIT_ORDER_TARGET_POINT)
+            G_PublishIssuedPointOrder(self,queued.order_id,&queued.point,queued.issuer_player,queued.order);
+        else if(queued.target_type==UNIT_ORDER_TARGET_ENTITY) {
+            edict_t *target=unit_queued_target(&queued);
+            if(target)unit_publish_target_order(self,queued.order,target,queued.issuer_player);
+            else G_PublishIssuedPointOrder(self,queued.order_id,&queued.point,queued.issuer_player,queued.order);
+        } else if(queued.target_type==UNIT_ORDER_TARGET_NONE)
+            G_PublishIssuedImmediateOrder(self,queued.order_id,queued.issuer_player,queued.order);
+        if(!self->inuse || self->spawn_time!=spawn || G_IsDeferredFree(self) || M_IsDead(self))return true;
+        if(G_UnitHasActiveOrder(self) && G_UnitMoveRevision(self)!=revision)return true;
+        /* Instant Stop can retire the public head without retaining a task.
+         * Its callback does not prevent the original outer task construction. */
+        uint32_t const head=self->current_order_id;
+        queuedOrderResult_t result=unit_execute_queued_order(self,&queued);
+        if(result==QUEUED_ORDER_REPLACED)return true;
+        if(result==QUEUED_ORDER_STARTED) {
+            if(queued.target_type!=UNIT_ORDER_TARGET_NONE)self->current_order_id=head;
+            uint32_t const accepted_revision=G_UnitMoveRevision(self);
+            S_UnitAbilityOrderAccepted(self,queued.order);
+            if(queued.target_type!=UNIT_ORDER_TARGET_NONE && self->inuse && self->spawn_time==spawn &&
+               G_UnitMoveRevision(self)==accepted_revision)self->current_order_id=head;
+            return true;
+        }
+        self->current_order_id=0;
     }
     return false;
 }

@@ -3303,6 +3303,7 @@ bool M_CheckAttack(edict_t *);
 bool unit_is_walking(edict_t const *);
 void unit_setanimation(edict_t *, cstring_t);
 void unit_setmove(edict_t *, umove_t *);
+uint32_t G_UnitMoveRevision(edict_t const *);
 void M_MoveFrame(edict_t *);
 float M_DistanceToGoal(edict_t *);
 float unit_movedistance(edict_t *);

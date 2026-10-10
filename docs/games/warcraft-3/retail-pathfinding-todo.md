@@ -55,7 +55,9 @@ because they did not establish an overall performance win. This performance
 work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
-**284 done / 336 tasks; 52 remaining.**
+**285 done / 336 tasks; 51 remaining.**
+
+Payoff263 closes ORDER-02.3 by integrating generic queued activation and failed-successor dispatch. Retail fixtures remain unchanged; new repeated original/control traces supply the added contract.
 Payoff262 fixes explicit Attack/AttackOnce availability suppression with saved
 owner state. Stop and Attack Move release it; queued/rejected commands retain
 the executing policy. GROUP-03.2 stays open for full ranking and wider guards.
@@ -1556,7 +1558,7 @@ Evidence: [order evidence][M]. Tools/artifacts: order_tasks, arrival, lifetime.
 
 - [x] **ORDER-02.1** Four two-order FIFO cases pass identity, successor timing, callback and final recovery assertions. Evidence: [FIFO][fifo], O `fifo_two_order_cases=4`; controlled command inputs.
 - [ ] **ORDER-02.2** Map user Shift-queue versus internal task ownership and remaining queue control bits to producer/caller contracts.
-- [ ] **ORDER-02.3** Exercise empty queue, rejected successor and canceled pending order through those controls; assert head/tail/count, dispatch result and release.
+- [x] **ORDER-02.3** Payoff263: empty FIFO, removed Attack fallback, failed Repair successor, pending cancellation and live target activation have two read-only original runs and an unhooked control each. All 543 public markers agree; 38 admissions/32 activations retain exact head/tail/count, nested same-tick successor dispatch and deferred canonical release/reference decrements. Engine moves generic issued notifications from append to activation, preserves lost-target point execution, callback replacement/Stop/removal and saved sparse queues. 691 saved Ghidra instructions and target-event ABI are pinned; complete control-bit producer inventory remains ORDER-02.2. [Evidence](retail-pathfinding-engine.md#generic-queued-orders-publish-at-activation-including-failed-successors-payoff263).
 
 ### ORDER-03 — Callback mutation
 

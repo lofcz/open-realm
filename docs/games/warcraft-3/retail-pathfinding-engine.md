@@ -16309,3 +16309,92 @@ temporary storage and restores the import after each audit sequence. Assertions
 and gameplay behavior remain unchanged. Two compile warnings were also removed
 by sizing a command-test expected path correctly and making the existing
 network-name truncation explicit; the name bytes and wire contract are identical.
+
+## Generic queued orders publish at activation, including failed successors (Payoff263)
+
+ORDER-02.3 is closed by five complete public queue scenarios: no pending orders,
+removed Attack target, removed Repair building, canceled pending orders, and a
+live Attack target. Each has two read-only Frida runs and an observer-free
+control. All **543 public markers** agree within each scenario. Ten observed
+runs preserve **38 admitted user identities, 32 activations**, exact head/tail/
+count relationships, synchronous failed-successor dispatch and deferred
+canonical release. The frozen evidence contains **691 original instructions**
+from seven saved Ghidra functions. No previous retail fixture was regenerated.
+
+`Unit_AppendUserOrder(693490)` retains Shift packets with `order20.4`, preserving
+the executing user head and internal task. It emits no issued-order callback for
+the busy append. `Unit_DispatchUserOrderHead(67abe0)` first clears incoming
+`order20.80`, classifies the packet, and publishes its issued callback while the
+new public head is already visible and before constructing its internal task.
+It samples the internal task head again after callbacks.
+
+The target identity and retained point are independent. A live target selects
+`Unit_FireIssuedTargetOrderEvent(67d2b0)`; an unresolved target selects the point
+producer `67c230`, using the retained point. In the removed Attack scene, the
+head activates as Attack Move toward that point. In the removed Repair scene,
+Repair publishes point event852024 at tick87, cannot construct repair work, and
+the following point Move851986 activates synchronously at that same tick,
+through nested dispatch depth2. In the cancellation scene, Stop at tick80
+reduces the old chain from three entries to its preserved current head, releases
+the two unactivated successors, and emits neither successor's issued callback.
+Every scenario finishes with invalid user head/tail, count0 and no internal task.
+
+The engine now publishes generic point, target and immediate queued events at
+activation. Selected Move and internal Patrol continuations retain their existing
+owner-specific execution. Existing unsupported stale-widget rejection remains unchanged. A lost unit target is resolved into the retained
+point dispatch; the concrete order owner decides whether it can execute. Failure
+continues through the FIFO without leaking its backing allocation. Callback
+removal and nested task replacement survive unwind. Instant Stop leaves no
+internal task, so outer construction can continue with its public head absent,
+matching the original dispatcher and the prior Payoff250 evidence.
+
+A process-local per-entity move revision detects task replacement even if the
+new task uses the same behavior pointer and target. It is compared only across
+synchronous callbacks and is neither saved nor used to choose work across ticks.
+The sparse queue retains O(1) pop and amortized O(1) append; activating a rejected
+head performs bounded work and advances once. No extra entity save field or save
+version change is needed.
+
+Seven production-path regressions cover append/activation timing, live target
+payloads, removed/stale target fallback, empty/canceled storage, callback Move/
+Stop/removal and saved successors, plus optional IDs in direct queue appends. The initial three regressions failed 23
+assertions before the fix. An older pool192 engine test expected stale-target
+Attack to be discarded; that expectation contradicts the original unresolved-
+target branch and the new retail captures. It now asserts the retained Attack
+Move while continuing to check sparse storage reclamation and replacement.
+Its expected retained point is supplied by the C producer, not generated from
+engine movement output.
+
+Canonical retirement is distinct from payload destruction. The captures verify
+one deferred wrapper release and one reference decrement for every admitted
+packet. Some queued UI requests retain a payload reference after wrapper
+retirement; these are preserved in the evidence rather than reported as
+zero-reference factory reclaim. Complete control-bit producer inventory remains
+ORDER-02.2, populated factory relationships remain ORDER-04.2, and exact combat/
+Repair trajectories retain their existing domain scopes.
+
+Reproduce the new contract with:
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_queue263.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/queue263-fresh.json
+```
+
+The archive is
+`/GitHub/wc3-analysis/reports/pathfinding-1.27/research/ORDER-02.3/payoff263/`.
+Failed compilation, unfunded Repair, camera drafts and the non-rejecting Attack
+experiments are excluded from acceptance. Native instruction pins and read-only
+capture checks reject altered event shape, premature execution, missing release,
+reference imbalance, missing controls and incomplete dispatcher unwind.
+
+Focused validation: production/test builds passed. The fresh original verifier
+passed all 15 captures, 543 public markers and 691 instruction pins; both Classic
+and TFT ran **75 tests / 40,680 assertions**. The new Python evidence suite passed
+**19 tests**, including deliberate evidence corruption. Full validation remains
+on the authorized twelve-implementation cadence; this is **1/12** after Payoff262.
+
+The exact staged inventory also passed all **499 entries** and the **37 corpus
+integrity tests**. All498 prior corpus entries remain structurally identical;
+existing numeric/capture fixtures are unchanged. The inventory oracle count
+changes from217 to218 solely because this new executable contract was added.
