@@ -1476,6 +1476,9 @@ bool S_UnitAbilityEventWithCall(edict_t *ent, abilityMsg_t msg, abilityCall_t co
     if (!ent) return false;
     if (msg == A_UNIT_TYPE_CHANGING || msg == A_UNIT_TYPE_CHANGED)
         return unit_dispatch_engine_event_abilities(ent, msg, payload);
+    bool owner_event = msg == A_UNIT_OWNER_CHANGING || msg == A_UNIT_OWNER_CHANGED;
+    if (owner_event)
+        handled |= unit_dispatch_engine_event_abilities(ent, msg, payload);
     if (msg == A_AUTO_COMBAT_START || msg == A_AUTO_COMBAT_END || msg == A_UNIT_STAND || msg == A_DEATH ||
         msg == A_UNIT_REMOVING || msg == A_UNIT_RETIRE || msg == A_UNIT_REMOVE)
         handled |= unit_dispatch_engine_event_abilities(ent, msg, payload);
@@ -1491,6 +1494,16 @@ bool S_UnitAbilityEventWithCall(edict_t *ent, abilityMsg_t msg, abilityCall_t co
 
     FOR_LOOP(i, num_innate) {
         if (!innate_receives(i, msg)) continue;
+        /* Move is both innate and an engine owner. Keep other innate owner
+         * notifications while delivering each subscribed procedure once. */
+        if (owner_event) {
+            bool visited = false;
+            FOR_LOOP(j, num_engine_events)
+                if (engine_event_receives(j, msg) &&
+                    engine_event_items[j].ability->proc == innate_items[i].ability->proc)
+                    visited = true;
+            if (visited) continue;
+        }
         abilityCall_t call = payload ? *payload : MAKE(abilityCall_t, 0);
         call.item = innate_items + i;
         handled |= S_AbilityMessage(ent, msg, &call) != 0;
@@ -2282,12 +2295,43 @@ TEST(wc3_ability_dispatch, initialization_clear_retains_outer_and_nested_continu
     InitAbilities();
 }
 
-TEST(wc3_ability_dispatch, engine_stand_visits_only_the_hold_owner) {
+TEST(wc3_ability_dispatch, engine_stand_visits_only_hold_and_attack_owners) {
     InitAbilities();
     edict_t unit = {0};
     engine_event_visits = 0;
     FOR_LOOP(i, 128) T_ASSERT(!unit_dispatch_engine_event_abilities(&unit, A_UNIT_STAND, NULL));
-    T_EQ(engine_event_visits, 128);
+    /* Retail d014a also evaluates Attack's guard after a point arrival. */
+    T_EQ(engine_event_visits, 128*2);
+    T_ASSERT(!unit.attack_guard.timer.active);
+}
+
+static uint32_t owner254_move_calls,owner254_innate_calls;
+static intptr_t owner254_move_proc(edict_t *ent,abilityMsg_t msg,abilityCall_t const *call) {
+    if(msg==A_UNIT_OWNER_CHANGING || msg==A_UNIT_OWNER_CHANGED)owner254_move_calls++;
+    return false;
+}
+static intptr_t owner254_innate_proc(edict_t *ent,abilityMsg_t msg,abilityCall_t const *call) {
+    if(msg==A_UNIT_OWNER_CHANGING || msg==A_UNIT_OWNER_CHANGED)owner254_innate_calls++;
+    return false;
+}
+TEST(wc3_ability_dispatch, owner254_preserves_other_innates_and_deduplicates_move) {
+    ability_t const *items[]={FindAbilityByClassname(STR_CmdMove),
+        FindAbilityByClassname("Amov"),FindAbilityByClassname("Awan")};
+    abilityProc_t saved[3];
+    FOR_LOOP(i,3) {
+        saved[i]=items[i]->proc;
+        S_ReplaceAbilityProcedure(items[i],i==2 ? owner254_innate_proc : owner254_move_proc);
+    }
+    InitAbilities();
+    edict_t *unit=G_Spawn();
+    owner254_move_calls=owner254_innate_calls=0;
+    S_UnitAbilityEvent(unit,A_UNIT_OWNER_CHANGING);
+    T_EQ(owner254_move_calls,1);T_EQ(owner254_innate_calls,1);
+    S_UnitAbilityEvent(unit,A_UNIT_OWNER_CHANGED);
+    T_EQ(owner254_move_calls,2);T_EQ(owner254_innate_calls,2);
+    G_FreeEdict(unit);
+    FOR_LOOP(i,3)S_ReplaceAbilityProcedure(items[i],saved[i]);
+    InitAbilities();
 }
 TEST(wc3_ability_dispatch, innate_stand_dispatch_does_not_visit_unhandled_procedures) {
     InitAbilities();

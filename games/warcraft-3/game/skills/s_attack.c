@@ -167,7 +167,7 @@ static void attack_deliver_target_lost(edict_t *target) {
 #define ATTACK_HELP_SUPPRESSION 3.0f
 #define ATTACK_AI_HELP_SUPPRESSION 0.5f
 
-enum { ATTACK_TIMER_CAP, ATTACK_TIMER_HELP, ATTACK_TIMER_SWING, ATTACK_TIMER_COUNT };
+enum { ATTACK_TIMER_CAP, ATTACK_TIMER_HELP, ATTACK_TIMER_SWING, ATTACK_TIMER_GUARD, ATTACK_TIMER_COUNT };
 static uint32_t attack_cap_heap[MAX_ENTITIES*ATTACK_TIMER_COUNT], attack_cap_positions[MAX_ENTITIES*ATTACK_TIMER_COUNT];
 static uint32_t attack_cap_count;
 
@@ -176,6 +176,7 @@ static abilityPrimaryTimer_t *attack_primary_timer(uint32_t key) {
     switch (key%ATTACK_TIMER_COUNT) {
     case ATTACK_TIMER_HELP: return &unit->combat_help;
     case ATTACK_TIMER_SWING: return &unit->attack_swing;
+    case ATTACK_TIMER_GUARD: return &unit->attack_guard.timer;
     default: return &unit->attack_speed_cap;
     }
 }
@@ -240,11 +241,63 @@ static void attack_help_cancel(edict_t *unit) {
 static void attack_swing_cancel(edict_t *unit) {
     attack_cap_remove(unit,ATTACK_TIMER_SWING);unit->attack_swing.active=false;
 }
+/* Native00b570 initializes the guard poll period independently of map tuning.
+ * GuardDistance and GuardReturnTime remain authored Misc values. */
+#define ATTACK_GUARD_POLL_PERIOD 2.0f
+
+static void attack_guard_cancel(edict_t *unit) {
+    attack_cap_remove(unit,ATTACK_TIMER_GUARD);
+    unit->attack_guard.timer.active=false;
+}
+
+static void attack_guard_arm(edict_t *unit,bool returning) {
+    wc3Clock_t now=G_TimerQueryClock(NULL);
+    attack_guard_cancel(unit);
+    unit->attack_guard.returning=returning;
+    unit->attack_guard.timer=(abilityPrimaryTimer_t){.active=true,.deadline=now,
+        .sequence=++level.timer_sequence};
+    unit->attack_guard.timer.deadline.time=wc3_add(now.time,
+        returning ? game.constants.guardReturnTime : ATTACK_GUARD_POLL_PERIOD);
+    attack_cap_insert(unit,ATTACK_TIMER_GUARD);
+}
+
+static bool attack_guard_outside(edict_t const *unit) {
+    return !S_UnitPointInMoveRange(unit,&unit->attack_guard.point,unit->attack_guard.range);
+}
+
+/* d014a runs after point completion. A subsequent Move starts a new physical
+ * task without cancelling the Attack-owned guard request. */
+static void attack_guard_stand(edict_t *unit) {
+    if(!unit || !unit->inuse || M_IsDead(unit) || G_IsDeferredFree(unit) ||
+       unit->s.player<PLAYER_NEUTRAL_AGGRESSIVE || !attack_cap_present(unit))return;
+    if(!unit->attack_guard.initialized) {
+        unit->attack_guard.point=unit->s.origin2;
+        unit->attack_guard.range=game.constants.guardDistance;
+        unit->attack_guard.initialized=true;
+    }
+    attack_guard_arm(unit,attack_guard_outside(unit));
+}
+
+static void attack_guard_fire(edict_t *unit) {
+    bool returning=unit->attack_guard.returning;
+    attack_guard_cancel(unit);
+    if(!unit->inuse || M_IsDead(unit) || G_IsDeferredFree(unit) ||
+       unit->s.player<PLAYER_NEUTRAL_AGGRESSIVE || !attack_cap_present(unit))return;
+    if(!returning) {
+        attack_guard_arm(unit,attack_guard_outside(unit));
+        return;
+    }
+    /* Timer rearm uses its request deadline; physical queries use the current
+     * source-clock quantum. They differ when a request falls between quanta. */
+    G_IssueUnitPointOrder(unit,"move",&unit->attack_guard.point,false,unit->s.player,0);
+}
+
 static void attack_primary_fire(void) {
     uint32_t key=attack_cap_heap[0];
     edict_t *unit=g_edicts+key/ATTACK_TIMER_COUNT;
     switch (key%ATTACK_TIMER_COUNT) {
     case ATTACK_TIMER_HELP: attack_help_cancel(unit); break;
+    case ATTACK_TIMER_GUARD: attack_guard_fire(unit); break;
     case ATTACK_TIMER_SWING:
         attack_swing_cancel(unit);
         /* Replacement orders, death and slot reuse cannot inherit completion. */
@@ -1704,7 +1757,7 @@ BZ_ABILITY_PROC(CAbilityAttack) {
         FOR_LOOP(slot,2)if(S_AttackProfileRead(ent,slot)->type!=ATK_NONE)return true;
         return false;
     case A_UNIT_EVENT_MASK:
-        return UNIT_MESSAGE_SUBSCRIPTIONS(A_AUTO_COMBAT_START,A_COMBAT_ALERT,A_ALLY_COMBAT_ALERT,A_UNIT_REMOVE,A_UNIT_REMOVING,A_UNIT_RETIRE,A_DEATH,A_MOVE_LEAVE,A_TARGET_LOST,A_ORDER_ACCEPTED);
+        return UNIT_MESSAGE_SUBSCRIPTIONS(A_AUTO_COMBAT_START,A_COMBAT_ALERT,A_ALLY_COMBAT_ALERT,A_UNIT_REMOVE,A_UNIT_REMOVING,A_UNIT_RETIRE,A_DEATH,A_MOVE_LEAVE,A_TARGET_LOST,A_ORDER_ACCEPTED,A_UNIT_STAND,A_UNIT_OWNER_CHANGING);
     case A_TARGET_ORDER_ADMIT: {
         if (!ent || !call || !call->issued_target_order.order ||
             (strcmp(call->issued_target_order.order,"attack") &&
@@ -1726,6 +1779,10 @@ BZ_ABILITY_PROC(CAbilityAttack) {
         if (!call || !call->issued_target_order.order || strcmp(call->issued_target_order.order,"attackonce"))
             return ABILITY_ORDER_UNHANDLED;
         return S_OrderAttack(ent,call->issued_target_order.target) ? ABILITY_ORDER_ACCEPTED : ABILITY_ORDER_REJECTED;
+    case A_UNIT_STAND:
+        attack_guard_stand(ent);return false;
+    case A_UNIT_OWNER_CHANGING:
+        if(ent){attack_guard_cancel(ent);ent->attack_guard.initialized=false;}return false;
     case A_ORDER_ACCEPTED:
         /* Public identity belongs to the accepted user head. Acquisition and
          * retaliation call order_attack directly and retain the existing head. */
@@ -1748,6 +1805,7 @@ BZ_ABILITY_PROC(CAbilityAttack) {
             if(g_edicts[i].attack_speed_cap.active)attack_cap_insert(g_edicts+i,ATTACK_TIMER_CAP);
             if(g_edicts[i].combat_help.active)attack_cap_insert(g_edicts+i,ATTACK_TIMER_HELP);
             if(g_edicts[i].attack_swing.active)attack_cap_insert(g_edicts+i,ATTACK_TIMER_SWING);
+            if(g_edicts[i].attack_guard.timer.active)attack_cap_insert(g_edicts+i,ATTACK_TIMER_GUARD);
         }
         return true;
     case A_PRIMARY_TIMER_NEXT:
@@ -1807,11 +1865,11 @@ BZ_ABILITY_PROC(CAbilityAttack) {
         return false;
     case A_DEATH:
     case A_UNIT_RETIRE:
-        if(ent)attack_set_target(ent,NULL);
+        if(ent){attack_set_target(ent,NULL);attack_guard_cancel(ent);}
         return false;
     case A_UNIT_REMOVING:
     case A_UNIT_REMOVE:
-        if(ent){attack_set_target(ent,NULL);attack_cap_cancel(ent);attack_help_cancel(ent);attack_swing_cancel(ent);}
+        if(ent){attack_set_target(ent,NULL);attack_cap_cancel(ent);attack_help_cancel(ent);attack_swing_cancel(ent);attack_guard_cancel(ent);}
         return false;
     case A_TARGET_REMOVED: {
         if (!call) return false;

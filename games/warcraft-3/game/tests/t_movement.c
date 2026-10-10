@@ -22756,11 +22756,11 @@ TEST(wc3_movement, target251_visibility_policy_matches_original_flag_matrix) {
 }
 
 
+static uint32_t target252_last_counter;
 static void target252_before(moveGroup_t const *group) {
-    /* Keep the complete raw capture in the fixture. This regression covers
-     * reacquisition through13.5s; the later native point-task restart is a
-     * separate unresolved producer, not an expectation to normalize away. */
-    if(level.pathing_counter>1474)return;
+    /* Keep every original word. Payoff252 stops before guard return;
+     * Payoff254 extends the same fixture through its timer-owned restart. */
+    if(level.pathing_counter>target252_last_counter)return;
     if(!target166_mismatch && group->count==1 && group->members[0].unit->s.player==15) {
         edict_t *u=group->members[0].unit;
         FOR_LOOP(i,sizeof(target252_target)/sizeof(*target252_target)) {
@@ -22804,7 +22804,18 @@ static void target252_before(moveGroup_t const *group) {
     target166_cursor++;
 }
 
-TEST(wc3_movement, target252_public_reacquire_matches_retail_and_cold_save) {
+static void target252_replay(uint32_t last_counter) {
+    target252_last_counter=last_counter;
+    /* The minimal movement archive omits UnitWeapons.slk. Retail's Footman
+     * has an Attack object even in this passive scene; guard timers belong to
+     * that object. Install authored presence, preserving all motion words. */
+    slkTestData_t *weapons=NULL,*old_weapons=NULL;
+    if(last_counter>1474) {
+        weapons=parse_slk_string("ID;PWXL;N;E\nB;Y2;X2;D0\n"
+            "C;X1;Y1;K\"unitWeaponID\"\nC;X2;K\"weapsOn\"\n"
+            "C;X1;Y2;K\"hRTE\"\nC;X2;K1\nE\n");
+        old_weapons=G_SetSLKRows("UnitWeapons",weapons);
+    }
     reset_entities();setup_test_world();
     FOR_LOOP(i,level.num_timers)G_TimerDestroy(level.timers+i);
     float radius=31,speed=270,sight=1400,old_min=game.constants.minUnitSpeed,old_max=game.constants.maxUnitSpeed;
@@ -22833,7 +22844,7 @@ TEST(wc3_movement, target252_public_reacquire_matches_retail_and_cold_save) {
         "if tick==80 then\nset fog=CreateFogModifierRadius(Player(0),FOG_OF_WAR_FOGGED,1568,800,900,false,true)\n"
         "call FogModifierStart(fog)\nendif\n"
         "if tick==90 then\ncall IssuePointOrder(b,\"move\",1568,288)\nendif\n"
-        "if tick==160 then\ncall IssuePointOrder(b,\"move\",1568,1312)\nendif\n"
+        "if tick==160 then\ncall IssuePointOrder(b,\"move\",GetUnitX(b),1312)\nendif\n"
         "if tick==210 then\ncall IssueImmediateOrder(a,\"stop\")\ncall IssueImmediateOrder(b,\"stop\")\nendif\n"
         "if tick==83 then\ncall DestroyFogModifier(fog)\nendif\n"
         "endfunction\nfunction main takes nothing returns nothing\n"
@@ -22848,14 +22859,14 @@ TEST(wc3_movement, target252_public_reacquire_matches_retail_and_cold_save) {
     FOR_LOOP(pass,2) {
         bool saved=false;
         if(pass) {T_ASSERT(ReadGame(file));target166_cursor=190;}
-        while(level.pathing_counter<1474 && !target166_mismatch) {
+        while(level.pathing_counter<last_counter && !target166_mismatch) {
             level.time+=5;globals.RunFrame();
             if(!target166_unit)FILTER_EDICTS(ent,ent->inuse && ent->class_id==custom.newUnitID && ent->s.player==0) {
                 target166_unit=ent;break;
             }
             if(!pass && !saved && target166_cursor==190) {T_ASSERT(WriteGame(file));saved=true;}
         }
-        T_EQ(target166_cursor,1474u-target252_reacquire[0][0]+1);
+        T_EQ(target166_cursor,last_counter-target252_reacquire[0][0]+1);
         if(target166_mismatch)break;
         T_NOT_NULL(target166_unit);
         if(target166_unit) {
@@ -22867,6 +22878,15 @@ TEST(wc3_movement, target252_public_reacquire_matches_retail_and_cold_save) {
     move_test_group_begin=NULL;target166_unit=NULL;level.started=false;remove(file);
     G_FowShutdown();reset_entities();G_SetMapUnitOverrides(NULL);level.mapinfo=oldinfo;
     game.constants.minUnitSpeed=old_min;game.constants.maxUnitSpeed=old_max;game.constants.followRange=old_follow;
+    if(weapons){G_SetSLKRows("UnitWeapons",old_weapons);free_slk_rows(weapons);}
+}
+
+TEST(wc3_movement, target252_public_reacquire_matches_retail_and_cold_save) {
+    target252_replay(1474);
+}
+
+TEST(wc3_movement, target254_neutral_guard_restart_matches_retained_retail_rows) {
+    target252_replay(1723);
 }
 
 #endif

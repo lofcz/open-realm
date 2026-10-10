@@ -409,6 +409,8 @@ static void InitConstants(void) {
     InitMiscValue("RootAngle", &game.constants.rootAngle);
     /* BZ_HARDCODED_DATA_FALLBACK: stock WC3 follow distances. These are
      * distinct from AcquireRange; map Misc overrides remain authoritative. */
+    InitMiscValueDefault("GuardDistance", &game.constants.guardDistance, 600.0f);
+    InitMiscValueDefault("GuardReturnTime", &game.constants.guardReturnTime, 5.0f);
     InitMiscValueDefault("FollowRange", &game.constants.followRange, 300.0f);
     InitMiscValueDefault("StructureFollowRange", &game.constants.structureFollowRange, 100.0f);
     InitMoveSpeedLimit("MinUnitSpeed", &game.constants.minUnitSpeed, 1.f);

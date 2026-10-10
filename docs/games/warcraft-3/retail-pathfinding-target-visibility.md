@@ -580,3 +580,81 @@ field; `MapPathfinding.java` records the same evidence. The external archive
 On these owned Wine environments, invoke `point214_ui_input.exe PID continue`
 directly: it is a shell wrapper, not a PE to pass to Wine. An X11 Space event
 alone did not advance DirectInput's loading screen.
+
+## Attack guard timers restart neutral movement (Payoff254)
+
+The point-task restart excluded by Payoff252 comes from Attack's guard-return
+request, not a Move retry or fog callback. A neutral mobile unit retains its
+spawn guard anchor while obeying a point Move. Attack evaluates that anchor
+periodically; a point arrival evaluates it again. Issuing another Move does not
+cancel the separate Attack request.
+
+| Original owner | Address | Contract |
+|---|---|---|
+| Poll initialization | `6f00b570` | Initialize `d6bf60` to two game seconds. This is independent of map tuning. |
+| Attach / guard task | `6f497c50` / `6f49e880` | Neutral/structure policy retains the anchor and starts evaluation. Guard task `d014a` runs after point completion. Ordinary player mobile units use a different anchor/cancellation branch. |
+| Range evaluation | `6f495610` | Mobile predicted pose against captured X `2ac`, Y `2b4`, and authored `Misc.GuardDistance` at `27c`, through the existing source-collision predicate. |
+| Poll | `6f499030` / `6f49d220` | `d01ad` evaluates every two seconds; an outside result switches to return. |
+| Return arm | `6f497330` | Replace the request with nonperiodic `d01ae`, using authored `Misc.GuardReturnTime`. |
+| Return expiry | `6f497fc0` | Replace the active task with Move `d0012` to the retained anchor. Stop/invalidate commits pending motion and clears velocity between owner visits. |
+| Continuation | `6f498ff0` | Appended `d0013` requests optional `Asla` SleepAlways. It is not a public Stop command. |
+
+In the retained scene, the target starts at1568/288 with range600. Polls1157
+and1224 find it inside; poll1290 finds it outside and arms five seconds. Its
+first point arrival1316 rearms five seconds. Public Move1324 leaves that request
+live. Expiry1482 replaces its task; target words first change1483, followed by
+the follower's destination sample1495. Retail also visits the old empty owner
+at1483. That duplicate remains in the raw fixture.
+
+Two final read-only Frida observations and an observer-free control agree on all
+215 public markers each. All618 follower and624 target rows remain byte-for-byte
+equal to the original Payoff252 capture. The observer records the return
+producer's native call chain, timer delay/periodicity, anchor, range and pending
+pose before/after replacement. Its raw mover field named `clock` is offset8c
+and is not used as a time source.
+
+The engine now keeps the request in Attack's existing indexed primary-timer
+heap. Updates cost logarithmic time in active Attack requests; expiry does not
+scan all scenery. Guard anchor, captured range, phase, deadline and insertion
+serial survive Save165; load rebuilds heap membership. Ownership changes, death
+and entity removal unlink the request. Other innate owner-change notifications
+remain intact, and Move receives its notification once despite its two registry
+roles. The ordinary player Stop guard remains a separate policy.
+
+Timer rearming uses the exact request deadline. Physical range tests and pending
+pose integration use the current source-clock quantum. These clocks differ when
+a request falls between quanta. Using the deadline for both produced a small,
+reproducible position overshoot; preserving the distinction fixes the original
+word comparison without altering its expectations.
+
+`wc3_movement.target254_neutral_guard_restart_matches_retained_retail_rows`
+executes the public JASS scene through counter1723 and repeats the suffix after
+a cold save before expiry. It checks616 follower visits,25 words each, and the
+first target visit per counter. Empty-buffer destinations without a published
+pointer retain the earlier explicit comparison scope. The scripted Stop and
+its last two visits, the duplicate empty owner, structure-disabled heading,
+early global neutral-passive gates, optional sleep continuation and wider
+creep/damage/JASS guard policies are not certified by this slice. TARGET-03.2
+remains open for the remaining policy compositions.
+
+The minimal movement fixture lacks UnitWeapons.slk. This test installs an
+authored `weapsOn` row to create the Attack owner that the retail Footman already
+has; it changes no expected motion word. Lifecycle tests use non-stock guard
+range700 and return time7 to verify tuning, then test owner transfer, death,
+removal, rebasing and save/load. The first regression failed at target1483 and
+the follower suffix before the implementation.
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_guard254.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/guard254-fresh.json
+```
+
+`retail-guard254-1.27.json{,.gz}` retains final observations4/5 and control1,
+374 original instructions and source hashes. `Work254Evidence.java` saves the
+partial `WC3AttackGuardPrefix`, function comments and xrefs; `MapPathfinding.java`
+retains the same mapping. External archive `research/TARGET-03.2/payoff254/`
+also keeps earlier read-only observations, failing-first logs and the identical
+saved-program readback. The map builder only shortens the original probe to its
+first complete scene; terrain, pathing and object data are unchanged. See also
+[guard ownership](guard-position.md#retail-guard-system-follow-up).

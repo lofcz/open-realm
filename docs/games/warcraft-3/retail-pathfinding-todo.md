@@ -56,6 +56,12 @@ work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
 **281 done / 336 tasks; 55 remaining.**
+Payoff254 identifies and ports the Attack-owned neutral guard timer behind the
+previously excluded point-task restart. Two final read-only retail repeats and an
+unhooked control retain all618/624 original trajectory rows; engine replay and
+cold-save suffix now match through1723. Authored tuning, lifecycle cleanup and
+Save165 pass without changing frozen expectations. TARGET-03.2 remains open for
+wider policy compositions. See [guard timers](retail-pathfinding-target-visibility.md#attack-guard-timers-restart-neutral-movement-payoff254).
 Payoff253 implements all six point/location fog query natives with constant-time
 completed-plane reads and original calling-client/neutral policy. Two retail
 repeats and an unhooked control preserve32 public markers; engine cold-save replay

@@ -2226,6 +2226,12 @@ struct edict_s {
     abilityPrimaryTimer_t attack_speed_cap; /* Independent of the public order. */
     abilityPrimaryTimer_t combat_help; /* Unit's primary d01b3 suppression request. */
     abilityPrimaryTimer_t attack_swing; /* Attack d01b2: completion independent of weapon cooldown. */
+    struct {
+        abilityPrimaryTimer_t timer; /* Attack280: periodic poll or one-shot return. */
+        vec2_t point;
+        float range;
+        bool initialized, returning;
+    } attack_guard;
     unitInfo_t unitinfo;
     unitAttack_t const *attack_profiles[2];
     unitAttack_t *attack_overrides[2];
@@ -2332,6 +2338,7 @@ struct game_locals {
         float rootAngle;
         /* Unit-target Move/Smart follows use WC3 Misc distances, not attack
          * acquisition range. war3mapMisc.txt may override either value. */
+        float guardDistance, guardReturnTime;
         float followRange;
         float structureFollowRange;
         float minUnitSpeed, maxUnitSpeed;

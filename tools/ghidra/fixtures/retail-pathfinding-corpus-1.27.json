@@ -18,7 +18,7 @@
     "archive": "Local report root containing the frozen JSONL inputs.",
     "engine": "Fresh compiled wc3_pathing_engine_probe.c library."
   },
-  "scope": "208 executable original/evidence contracts;489 total entries.",
+  "scope": "209 executable original/evidence contracts;490 total entries.",
   "entries": [
     {
       "id": "oracle-adaptive",
@@ -50993,6 +50993,67 @@
         "Six query natives implement original completed-plane classification, calling-client policy and forced-neutral visibility. Nonfinite coordinates and arbitrary map-bound producers remain BASE-02.3/NUM-03.",
         "TARGET-03.2 remains open for broader loss/reacquisition policies and the independently observed point-task restart. No existing retail fixture was regenerated or weakened."
       ]
+    },
+    {
+      "id": "oracle-guard254",
+      "kind": "oracle",
+      "command": [
+        "{python}",
+        "tools/ghidra/verify_wc3_pathing_guard254.py",
+        "--binary",
+        "{binary}",
+        "--report",
+        "{report}"
+      ],
+      "inputs": {
+        "binary_sha256": "d51e5680243fc90e19c9d6074f7fac433c466d3cf5f46e2364291725574d8236"
+      },
+      "report": "guard254.json",
+      "expected_exit": 0,
+      "expected_status": "verified",
+      "checks": {
+        "passed": {
+          "equal": true
+        },
+        "captures": {
+          "equal": 2
+        },
+        "controls": {
+          "equal": 1
+        },
+        "public_markers": {
+          "equal": 645
+        },
+        "raw_follower_rows": {
+          "equal": 618
+        },
+        "raw_target_rows": {
+          "equal": 624
+        },
+        "guard_arms": {
+          "equal": 12
+        },
+        "instructions": {
+          "equal": 374
+        },
+        "engine_last_counter": {
+          "equal": 1723
+        },
+        "engine": {
+          "length": 2
+        }
+      },
+      "evidence": [
+        "S",
+        "L"
+      ],
+      "scope": "Attack-owned neutral mobile guard polling/return, exact retained pursuit through restart and cold save, authored tuning and lifecycle timer cleanup.",
+      "exclusions": [
+        "Two final read-only original observations and one observer-free control; no code/data patches or game calls from the observer.",
+        "All618 original follower and624 target rows repeat unchanged, including the old empty owner visit at1483. Engine replay checks25 follower words per owner and the first target visit per counter, bounded before authored Stop at1724.",
+        "This chunk implements neutral mobile Attack guard polling/return. Structure-disabled heading, early global neutral-passive gates, Asla sleep continuation and wider damage/creep/JASS guard policies are not certified.",
+        "Timer arming uses the request deadline; physical range and pending-pose integration use the current primary source-clock quantum. Existing frozen expected fixtures are unchanged."
+      ]
     }
   ],
   "fixtures": [
@@ -51891,7 +51952,7 @@
     },
     {
       "path": "tools/ghidra/MapPathfinding.java",
-      "sha256": "3e0c0f98284c8896615bd957b4bbe3eb151f838b0c772849559f1a3fffa24d43"
+      "sha256": "018e5ab5217ce5b3392cd494dc5121bd4d3705986fdb05ad84b4ed6917c8a385"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_metadata_busy_motion_119.h",
@@ -53183,7 +53244,7 @@
     },
     {
       "path": "games/warcraft-3/game/g_save.c",
-      "sha256": "c003579367844910ad3bab0d60e6adad3ad59252bbd3053977fa61712ffbe21f"
+      "sha256": "5a9af6703d7d29c6b740b9a5ec0415d88a6cb7b1f5ce785696e361879a9d6756"
     },
     {
       "path": "games/warcraft-3/game/g_destructable.c",
@@ -53191,7 +53252,7 @@
     },
     {
       "path": "games/warcraft-3/game/g_local.h",
-      "sha256": "c1683bd4a99283837c6c4fcdfb7998ddd402117b6ca1b49416b913b2b2762667"
+      "sha256": "adcfe4e703a6fa6b9317a635ccc9d6a794d6d353d4d451a010c71ea0402aefe1"
     },
     {
       "path": "games/warcraft-3/common/wc3_pathing_regions.h",
@@ -53439,7 +53500,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_movement.c",
-      "sha256": "ede79ae94cf14a39290ace2e092ab59d383a5bb98767da1b3bb553e54809ce83"
+      "sha256": "a71a3169c5be3821bee10e6f6546ac3c9f968653efad3e69df0c23089611bf5b"
     },
     {
       "path": "games/warcraft-3/game/tests/t_repulsion_crowds.c",
@@ -53683,7 +53744,7 @@
     },
     {
       "path": "tests/test_wc3_pathfinding_corpus.py",
-      "sha256": "ca70755dd874ba02d734ba99c2b9ae8c6a80af4443317a4953e7fdefbb1d76ef"
+      "sha256": "b7c9c7e75c1aa080024885bf39c8c406aeb58b9a8d023fd52b81c6e257dd9000"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-group-speed.md",
@@ -53691,7 +53752,7 @@
     },
     {
       "path": "docs/games/warcraft-3/save-load.md",
-      "sha256": "741ba211b53b16fb94116700b24d2add3afe0ee95950bad0cd82365931a05c5f"
+      "sha256": "0640e108c3746b787d1662efaac24e5d610cca36b3a85f12bff48df609393211"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-engine.md",
@@ -53699,7 +53760,7 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-todo.md",
-      "sha256": "2b2b40df6012112dbb88d02f8ce0da54587252f44772731c676738e9b96b21fb"
+      "sha256": "8c91724c9f84f72794c710210d8fadf5b0974a9045b8c2571eff580da1cc9daa"
     },
     {
       "path": "games/warcraft-3/game/g_timer.c",
@@ -53707,11 +53768,11 @@
     },
     {
       "path": "games/warcraft-3/game/skills/s_attack.c",
-      "sha256": "e19eb6a0d64f7e7c2afee6abfc01f07c2ecaba0b5105d49b8730ac8d8b32656b"
+      "sha256": "10316f6a5e023f116588857578501139351cdffdf2eeba2e6296f6d2d8e9ba2d"
     },
     {
       "path": "games/warcraft-3/game/skills/s_skills.c",
-      "sha256": "1f4a2f93814caddea81437bffe860d420b1f529f54b6cbc57b1bf4eba8a319b2"
+      "sha256": "bd39655a59bfafb9b97abbf74730c0f94c9bcda31ed1a8ba9aa61a3897751382"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_attack_exemption.h",
@@ -53755,7 +53816,7 @@
     },
     {
       "path": "games/warcraft-3/game/g_main.c",
-      "sha256": "6e7356064cc061b9435cdbd331e4c00611b8f7cc299b7df7dcaf7598908fa7bc"
+      "sha256": "6b41a319056a4c7a1447c28ca8487203d2d9104309ec22c4f03b212367833cdd"
     },
     {
       "path": "games/warcraft-3/game/g_utils.c",
@@ -54331,7 +54392,7 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-target-visibility.md",
-      "sha256": "c93cda09e027e7e51f38e2a5c81b99265f43448e0534cf020acf67d7d9300ddd"
+      "sha256": "8072a91037895579a907da69bf9be78c6fb4a1e670c40ba354c5830b9b7379e4"
     },
     {
       "path": "tools/frida/research/target021_analyze.py",
@@ -54783,7 +54844,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_order_lifecycle.c",
-      "sha256": "a75633a36e292b6fb407965ca634cb097a30dee27a83171b041a6b1b406a5c1e"
+      "sha256": "1cb2b09eeef829e3c71808849e27d144f8efce3a256c407b72caacc3e89e01b8"
     },
     {
       "path": "games/warcraft-3/game/tests/t_patrol_orders.c",
@@ -57476,6 +57537,34 @@
     {
       "path": "tests/test_wc3_pathfinding_fog_queries253.py",
       "sha256": "c7aa7eb728aacba094d47e12d47a7a12f4cc01b35674b5981a279c0226a6bd73"
+    },
+    {
+      "path": "tools/frida/research/target254_make_map.py",
+      "sha256": "0dd19883227b047aff0901875d3fdcf9402f63b3199b166b372151e643bcc151"
+    },
+    {
+      "path": "tools/frida/research/target254_restart_observer.js",
+      "sha256": "7be551bfb3ffb1256cd574729151bff9c9ef559048eaf87c7b324d615ace2ffb"
+    },
+    {
+      "path": "tools/ghidra/research/Work254Evidence.java",
+      "sha256": "19c32d6472bf861758de6dc8d0ff38654c541aa6948aa9e63f08735a4659979a"
+    },
+    {
+      "path": "tools/ghidra/verify_wc3_pathing_guard254.py",
+      "sha256": "b32d42c703564736ab127f343121f0b9f1a300340a34b6c8294a2fb62e56f4e3"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-guard254-1.27.json",
+      "sha256": "0a3bbbbc39d24616f4b31c22b3221fcc25ab2c880ea7d983181bda7da92d045d"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-guard254-1.27.json.gz",
+      "sha256": "913400019edeaf96eb988242b09633f71f9a67088bc86212e284a40aa967adb5"
+    },
+    {
+      "path": "tests/test_wc3_pathfinding_guard254.py",
+      "sha256": "f2ccdae702778bc0a15166e891eaccb7d19724648ed57fab8a43bf9833a71d9a"
     }
   ]
 }

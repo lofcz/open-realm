@@ -1138,4 +1138,42 @@ TEST(wc3_order_lifecycle, follow_direct_free_cannot_adopt_reused_target) {
     reset_entities(); setup_test_world();
 }
 
+TEST(wc3_order_lifecycle, guard254_timer_ownership_survives_move_save_and_rebase) {
+    reset_entities();setup_test_world();
+    float old_distance=game.constants.guardDistance,old_return=game.constants.guardReturnTime;
+    game.constants.guardDistance=700;game.constants.guardReturnTime=7;
+    level.timer_clock_valid=false;level.pathing_clock=(wc3Clock_t){8,0,300};
+    edict_t *unit=review_order_unit(0,PLAYER_NEUTRAL_PASSIVE);
+    T_ASSERT(unit->attack_guard.initialized);T_ASSERT(unit->attack_guard.timer.active);
+    T_ASSERT(!unit->attack_guard.returning);T_FEQ(unit->attack_guard.timer.deadline.time,10,0);
+    unit->s.origin2.x=900;unit->movement.pose_valid=false;
+    unit_stand(unit);
+    T_ASSERT(unit->attack_guard.returning);T_FEQ(unit->attack_guard.timer.deadline.time,15,0);
+    uint32_t serial=unit->attack_guard.timer.sequence,number=unit->s.number;
+    T_ASSERT(G_IssueUnitPointOrder(unit,"move",&(vec2_t){1200,0},false,unit->s.player,0));
+    T_EQ(unit->attack_guard.timer.sequence,serial);T_FEQ(unit->attack_guard.point.x,0,0);
+    cstring_t file=Test_TempPath("wc3-guard254.bin");
+    T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);unit=g_edicts+number;
+    T_EQ(unit->attack_guard.timer.sequence,serial);T_ASSERT(unit->attack_guard.returning);
+    T_FEQ(unit->attack_guard.timer.deadline.time,15,0);T_FEQ(unit->attack_guard.range,700,0);
+    abilityCall_t call={.clock_span=300};CAbilityAttack(NULL,A_PRIMARY_TIMER_REBASE,&call);
+    T_EQ(unit->attack_guard.timer.deadline.epoch,1);T_FEQ(unit->attack_guard.timer.deadline.time,-285,0);
+    G_SetUnitPlayer(unit,0);
+    T_ASSERT(!unit->attack_guard.timer.active);T_ASSERT(!unit->attack_guard.initialized);
+    game.constants.guardDistance=old_distance;game.constants.guardReturnTime=old_return;
+    reset_entities();setup_test_world();
+}
+
+TEST(wc3_order_lifecycle, guard254_death_and_removal_unlink_pending_return) {
+    FOR_LOOP(mode,2) {
+        reset_entities();setup_test_world();
+        level.timer_clock_valid=false;level.pathing_clock=(wc3Clock_t){8,0,300};
+        edict_t *unit=review_order_unit(0,PLAYER_NEUTRAL_PASSIVE);
+        T_ASSERT(unit->attack_guard.timer.active);
+        if(mode)G_FreeEdict(unit);else unit_die(unit,NULL);
+        T_ASSERT(!unit->attack_guard.timer.active);
+    }
+    reset_entities();setup_test_world();
+}
+
 #endif

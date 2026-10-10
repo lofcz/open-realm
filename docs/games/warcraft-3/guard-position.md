@@ -50,7 +50,8 @@ Warcraft also exposes a broader AI/creep guard-position system (`SetUnitCreepGua
 
 - `RemoveGuardPosition` and `RecycleGuardPosition` are still JASS placeholders in OpenRealm.
 - `SetUnitCreepGuard` is declared by `common.txt` but does not yet have a native implementation here.
-- neutral-creep 600/1000/5-style leash timing needs its own owner/AI policy and damage-timestamp state rather than being guessed onto player units.
+- Attack-owned neutral mobile guard polling and return now use authored GuardDistance/GuardReturnTime and an independent primary request. Move replacement retains this timer; arrival reevaluates it. See [the original timer producer and exact movement replay](retail-pathfinding-target-visibility.md#attack-guard-timers-restart-neutral-movement-payoff254).
+- MaxGuardDistance, damage-timestamp, early global gates and broader creep/JASS policy remain unimplemented; the bounded timer port does not establish those contracts.
 - forced relocation does not rewrite a generic retail creep guard point, whereas Hold Position remains a non-anchor policy. Keep those systems separate.
 
 Implement the broader creep/JASS guard layer as a follow-up on top of the shared guard-return movement primitive rather than changing Stop semantics again.

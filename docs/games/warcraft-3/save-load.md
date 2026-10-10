@@ -1,5 +1,10 @@
 # Warcraft III Save/Load
 
+Save165 retains Attack-owned neutral guard anchors, captured range, poll/return
+phase and exact primary request deadline/serial. Loading rebuilds timer-heap
+membership without rearming. Save164 and earlier layouts are rejected; the
+network contract is unchanged. See [guard timers](retail-pathfinding-target-visibility.md#attack-guard-timers-restart-neutral-movement-payoff254).
+
 Save164 retains completed visibility/exploration planes and the next ordered
 fog request. Loading preserves the plane until that request fires, including
 cold saves during pursuit fog loss. Row/geometry caches and client dirty flags
