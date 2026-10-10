@@ -658,3 +658,40 @@ also keeps earlier read-only observations, failing-first logs and the identical
 saved-program readback. The map builder only shortens the original probe to its
 first complete scene; terrain, pathing and object data are unchanged. See also
 [guard ownership](guard-position.md#retail-guard-system-follow-up).
+
+### Periodic guard request identity (Payoff255)
+
+An inside guard poll returns without touching its timer. The original event
+request dispatcher `0542d0` then rearms the same request through `053630`,
+retaining its unsigned serial. Guard evaluation uses this event-timer path,
+not the agent dispatcher `054370` / `053710`. Both families preserve periodic
+identity, but hooking only the latter records no guard requests.
+
+Final read-only observations5/6 confirm four guard rearms per run, at owner
+counters1157,1224,1619,1686. The first pair retains serial12; the later pair
+retains76. Canceled initial serial10, replaced return38 and retired poll76 pop
+without callbacks. The active return41 expires1482. All618/624 trajectory words
+and215 public markers remain equal to the prior captures and observer-free
+control. Request pointers are compared within each capture; normalized records
+retain deadlines, periods, flags, serials and event values across captures.
+
+The engine now advances the existing poll deadline without allocating a new
+request serial. A two-unit ordered-drain regression failed four serial checks
+before this change and passes afterward, including late catch-up and a cold
+save. This keeps ties stable and avoids unnecessary global serial consumption.
+The heap remains logarithmic in active requests. Explicit guard-task reevaluation
+and transitions into return still allocate a replacement request as before.
+
+`retail-guard255-1.27.json{,.gz}` pins the13 request events per repeat and139
+original instructions. `Work255Evidence.java` and `MapPathfinding.java` preserve
+the actual event-clock call chain. Initial observations1..4 retain valid motion
+but missed the request class, so they are excluded from request evidence.
+A controller attempt without Python `-I` failed before launch because a local
+`/tmp/dis.py` shadows the standard module; use isolated Python for temporary
+controllers. The external archive is `research/TARGET-03.2/payoff255/`.
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_guard255.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/guard255-fresh.json
+```

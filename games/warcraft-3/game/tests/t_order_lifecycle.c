@@ -1176,4 +1176,30 @@ TEST(wc3_order_lifecycle, guard254_death_and_removal_unlink_pending_return) {
     reset_entities();setup_test_world();
 }
 
+TEST(wc3_order_lifecycle, guard255_periodic_poll_retains_serial_and_catches_up_in_one_drain) {
+    reset_entities();setup_test_world();
+    FOR_LOOP(i,level.num_timers)G_TimerDestroy(level.timers+i);
+    level.timer_clock_valid=false;level.pathing_clock=(wc3Clock_t){8,0,300};
+    edict_t *units[]={review_order_unit(0,PLAYER_NEUTRAL_PASSIVE),
+        review_order_unit(128,PLAYER_NEUTRAL_PASSIVE)};
+    uint32_t serials[]={units[0]->attack_guard.timer.sequence,units[1]->attack_guard.timer.sequence};
+    T_ASSERT(serials[0]<serials[1]);
+    level.pathing_clock.time=14;
+    bool scheduled=level.scheduled_frame;level.scheduled_frame=true;G_RunTimers();level.scheduled_frame=scheduled;
+    FOR_LOOP(i,2) {
+        T_ASSERT(units[i]->attack_guard.timer.active);T_ASSERT(!units[i]->attack_guard.returning);
+        T_EQ(units[i]->attack_guard.timer.sequence,serials[i]);
+        T_FEQ(units[i]->attack_guard.timer.deadline.time,16,0);
+    }
+    cstring_t file=Test_TempPath("wc3-guard255-periodic.bin");
+    T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+    level.pathing_clock.time=16;level.timer_clock_valid=false;
+    level.scheduled_frame=true;G_RunTimers();level.scheduled_frame=scheduled;
+    FOR_LOOP(i,2) {
+        T_EQ(units[i]->attack_guard.timer.sequence,serials[i]);
+        T_FEQ(units[i]->attack_guard.timer.deadline.time,18,0);
+    }
+    reset_entities();setup_test_world();
+}
+
 #endif

@@ -18,7 +18,7 @@
     "archive": "Local report root containing the frozen JSONL inputs.",
     "engine": "Fresh compiled wc3_pathing_engine_probe.c library."
   },
-  "scope": "209 executable original/evidence contracts;490 total entries.",
+  "scope": "210 executable original/evidence contracts;491 total entries.",
   "entries": [
     {
       "id": "oracle-adaptive",
@@ -51054,6 +51054,66 @@
         "This chunk implements neutral mobile Attack guard polling/return. Structure-disabled heading, early global neutral-passive gates, Asla sleep continuation and wider damage/creep/JASS guard policies are not certified.",
         "Timer arming uses the request deadline; physical range and pending-pose integration use the current primary source-clock quantum. Existing frozen expected fixtures are unchanged."
       ]
+    },
+    {
+      "id": "oracle-guard255",
+      "kind": "oracle",
+      "command": [
+        "{python}",
+        "tools/ghidra/verify_wc3_pathing_guard255.py",
+        "--binary",
+        "{binary}",
+        "--report",
+        "{report}"
+      ],
+      "inputs": {
+        "binary_sha256": "d51e5680243fc90e19c9d6074f7fac433c466d3cf5f46e2364291725574d8236"
+      },
+      "report": "guard255.json",
+      "expected_exit": 0,
+      "expected_status": "verified",
+      "checks": {
+        "passed": {
+          "equal": true
+        },
+        "captures": {
+          "equal": 2
+        },
+        "controls": {
+          "equal": 1
+        },
+        "public_markers": {
+          "equal": 645
+        },
+        "raw_follower_rows": {
+          "equal": 618
+        },
+        "raw_target_rows": {
+          "equal": 624
+        },
+        "guard_rearms": {
+          "equal": 8
+        },
+        "guard_request_events": {
+          "equal": 26
+        },
+        "instructions": {
+          "equal": 139
+        },
+        "engine": {
+          "length": 2
+        }
+      },
+      "evidence": [
+        "S",
+        "L"
+      ],
+      "scope": "Periodic Attack guard request identity, serial preservation, delayed deterministic draining and cold-save continuation on the original event-clock dispatcher.",
+      "exclusions": [
+        "Final read-only observations5/6 on the unchanged Work254 map; observer-free control retained from Payoff254. All215 public markers agree. Initial1..4 missed the event-timer request class and do not certify request behavior.",
+        "Original guard polls rearm via0542d0/053630, not the agent054370/053710. Four rearms per repeat preserve serial and request identity; canceled initial/replaced/retired requests pop silently.",
+        "Engine ordered-drain/save regression covers tied two-unit cohorts and a late drain; the retained target254 trajectory remains word-exact through1723. No existing expected fixture is rewritten and no broader target-policy closure is claimed."
+      ]
     }
   ],
   "fixtures": [
@@ -51952,7 +52012,7 @@
     },
     {
       "path": "tools/ghidra/MapPathfinding.java",
-      "sha256": "018e5ab5217ce5b3392cd494dc5121bd4d3705986fdb05ad84b4ed6917c8a385"
+      "sha256": "67f58d88075e323fca293d981b721100654bc28aef354782320e749a90885a16"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_metadata_busy_motion_119.h",
@@ -53744,7 +53804,7 @@
     },
     {
       "path": "tests/test_wc3_pathfinding_corpus.py",
-      "sha256": "b7c9c7e75c1aa080024885bf39c8c406aeb58b9a8d023fd52b81c6e257dd9000"
+      "sha256": "454edbed7f190ca401a350f9f9b83ad10498547db21e7c2eb8ce2d8cf6b5a10b"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-group-speed.md",
@@ -53760,7 +53820,7 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-todo.md",
-      "sha256": "8c91724c9f84f72794c710210d8fadf5b0974a9045b8c2571eff580da1cc9daa"
+      "sha256": "79a21ec5903bd9cf5adb2aece638388acc19f32946f1c5baa8d10ec8288c9adf"
     },
     {
       "path": "games/warcraft-3/game/g_timer.c",
@@ -53768,7 +53828,7 @@
     },
     {
       "path": "games/warcraft-3/game/skills/s_attack.c",
-      "sha256": "10316f6a5e023f116588857578501139351cdffdf2eeba2e6296f6d2d8e9ba2d"
+      "sha256": "8d631c5121bbb90ac10ec13f5c290d709e2898450c2ce73d15323039b8c623fd"
     },
     {
       "path": "games/warcraft-3/game/skills/s_skills.c",
@@ -54392,7 +54452,7 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-target-visibility.md",
-      "sha256": "8072a91037895579a907da69bf9be78c6fb4a1e670c40ba354c5830b9b7379e4"
+      "sha256": "2829d1779c9b29e2be546fc9e6dcbb82cb450ae070c8b501b0d8ee7cc0ee4391"
     },
     {
       "path": "tools/frida/research/target021_analyze.py",
@@ -54844,7 +54904,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_order_lifecycle.c",
-      "sha256": "1cb2b09eeef829e3c71808849e27d144f8efce3a256c407b72caacc3e89e01b8"
+      "sha256": "05b539ce7e86a53f0141219953be139e407d2ec684ef2c96f8e5f78f02bb9b08"
     },
     {
       "path": "games/warcraft-3/game/tests/t_patrol_orders.c",
@@ -57565,6 +57625,30 @@
     {
       "path": "tests/test_wc3_pathfinding_guard254.py",
       "sha256": "f2ccdae702778bc0a15166e891eaccb7d19724648ed57fab8a43bf9833a71d9a"
+    },
+    {
+      "path": "tools/frida/research/target255_guard_requests.js",
+      "sha256": "0663119c9ce3aa1344914a575f1789b707539a544748d8b67b2c2aa5acfbe61e"
+    },
+    {
+      "path": "tools/ghidra/research/Work255Evidence.java",
+      "sha256": "f9124fedc61e5ed422c7c0f567e53d677963973fc53811212a2ae4a69e4e8b43"
+    },
+    {
+      "path": "tools/ghidra/verify_wc3_pathing_guard255.py",
+      "sha256": "e9f5d8200bdb40e072af98dbe6d3797a6aa361e7497e0db9821e7cfad041a171"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-guard255-1.27.json",
+      "sha256": "da2a133bdaab07ce58ea3d5706b0224ac499cd46e087c435fe009049cf29a45a"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-guard255-1.27.json.gz",
+      "sha256": "19b56c1524911462821fcc38091f8d0cb221b2088960ddd9cae788fc651295db"
+    },
+    {
+      "path": "tests/test_wc3_pathfinding_guard255.py",
+      "sha256": "9890e5b70b069b999e7d3554ea2db3f87879eee250c191ce4d38d2be37625094"
     }
   ]
 }

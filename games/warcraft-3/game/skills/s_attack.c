@@ -284,7 +284,15 @@ static void attack_guard_fire(edict_t *unit) {
     if(!unit->inuse || M_IsDead(unit) || G_IsDeferredFree(unit) ||
        unit->s.player<PLAYER_NEUTRAL_AGGRESSIVE || !attack_cap_present(unit))return;
     if(!returning) {
-        attack_guard_arm(unit,attack_guard_outside(unit));
+        if(attack_guard_outside(unit))attack_guard_arm(unit,true);
+        else {
+            /* Native053630 rearms the same periodic request. Preserve its
+             * serial so tied guard cohorts do not acquire a new priority. */
+            unit->attack_guard.timer.active=true;
+            unit->attack_guard.timer.deadline.time=wc3_add(
+                unit->attack_guard.timer.deadline.time,ATTACK_GUARD_POLL_PERIOD);
+            attack_cap_insert(unit,ATTACK_TIMER_GUARD);
+        }
         return;
     }
     /* Timer rearm uses its request deadline; physical queries use the current

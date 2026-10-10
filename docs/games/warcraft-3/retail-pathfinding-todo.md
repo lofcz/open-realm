@@ -56,6 +56,11 @@ work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
 **281 done / 336 tasks; 55 remaining.**
+Payoff255 preserves periodic guard request identity and serials across inside
+polls, late draining and cold save. Two original event-clock traces retain all
+earlier trajectory words and show canceled requests popping silently. This fixes
+tied-cohort ordering without another pathfinder or new task split. See
+[periodic guard identity](retail-pathfinding-target-visibility.md#periodic-guard-request-identity-payoff255).
 Payoff254 identifies and ports the Attack-owned neutral guard timer behind the
 previously excluded point-task restart. Two final read-only retail repeats and an
 unhooked control retain all618/624 original trajectory rows; engine replay and
