@@ -2217,7 +2217,9 @@ void S_StopUnitMovementWithRecovery(edict_t *self) {
     self->movement.point_forced_arrival=false;
     move_stop_velocity(self);
     move_detach_task(self);
-    S_RecoverStoppedUnitPosition(self);
+    /*69a840 supplies no placement callback for the structure support branch;
+     *171340 still cancels its physical task and invalidates the path. */
+    if(unit_scope)S_RecoverStoppedUnitPosition(self);
     move_invalidate_path(self);
     if(held) {
         record=wc3_records_owned(S_GetMoveFineSpatial(),self-g_edicts);

@@ -588,3 +588,55 @@ instruction guards, mirrored in `MapPathfinding.java`.
 Archive: `research/MAP-04.2/payoff257/` under the pathfinding reports root.
 MAP-04.2 stays open for the remaining canonical target-region, notification and
 public duplicate-cleanup compositions. No performance target is accepted here.
+
+## Stop recovery follows the current structure form (Payoff258)
+
+Public Stop admission and the internal support helper have separate gates.
+In two read-only retail traces and one new unhooked control, Stop succeeds for
+a Footman, Barracks, rooted Tree of Life and uprooted Tree of Life. Barracks and
+rooted Tree never enter `69a840`; Footman and uprooted Tree each enter twice.
+The engine's Stop owner now skips Move recovery for a current structure.
+No duplicate public callback is added from the observation alone.
+
+When the internal support helper is invoked directly, `69a840` selects a null
+placement callback for a structure. `05ca50` still holds the bridge exclusion,
+and `171340` still stops velocity, detaches the physical task and invalidates
+the path. Only embedded placement recovery is skipped. Returning early from
+that helper would leave authoritative movement state behind.
+
+The original `68c190` predicate is `bit10000 && (mode == 0 || signed-low-byte
+>= 0 || bit08000000)`. Sixteen original-code flag/mode cases repeat exactly.
+The live uprooted Tree has flags `00019281`: authored building identity remains,
+but low-byte `80` selects ordinary recovery in mode1. Use `G_UnitIsStructure`,
+which tracks the current Root form, rather than `G_UnitIsBuilding(rawcode)`.
+The existing Root ability regression now issues Stop both before and after
+uprooting while retaining the authored building identity.
+
+The mobile Tree retains three widget regions. Both retail repeats show all
+three counters changing `10000000 -> 10000001 -> 10000000` around each recovery.
+This supplies a public multi-region witness for Payoff257's separate original
+list kernel and production four-region/save regression. The new captures have
+15 public markers each and68 identical normalized scope events per observation.
+The shared capture runner's metadata retains its TARGET-03.2 label; the map,
+probe and observer hashes identify this MAP-04.2 experiment explicitly.
+
+A new production regression covers48 combinations: clear/blocked/exhausted
+terrain, four collision classes, public/internal entry and cold load. Before
+the gate,48 of552 assertions fail because structures enter recovery. Position
+assertions already pass: the lower placement solver rejects immobile units.
+This change removes incorrect recovery work; it does not claim a newly fixed
+structure displacement. Final results preserve all earlier original fixtures,
+including all eight original247 null-callback cases and their controls.
+
+Five Ghidra function annotations are saved and read back identically, with207
+instruction guards mirrored through `MapPathfinding.java`. Reproduce with:
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_work258.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/structure-stop258-fresh.json
+```
+
+Archive: `research/MAP-04.2/payoff258/` under the pathfinding reports root.
+MAP-04.2 remains open for canonical target-region, notification and public
+cleanup compositions. No frame-time target is accepted by this chunk.

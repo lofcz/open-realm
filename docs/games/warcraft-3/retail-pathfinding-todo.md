@@ -56,6 +56,13 @@ work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
 **282 done / 336 tasks; 54 remaining.**
+Payoff258 separates public structure Stop admission from internal null-callback
+support recovery, preserving task cancellation and path invalidation. Repeated
+retail four-form traces and an unhooked control confirm current-form gating and
+three mobile Ancient footprint regions; blocked-terrain/cold-save and actual
+Root regressions cover the engine. MAP-04.2 retains its wider compositions.
+See [structure Stop](retail-pathfinding-exclusions.md#stop-recovery-follows-the-current-structure-form-payoff258).
+
 Payoff257 integrates the independent nonstructure unit exclusion around Stop
 and replacement Move recovery, including all footprint regions. Two original
 read-only repeats preserve prior motion and scope expectations; actual engine

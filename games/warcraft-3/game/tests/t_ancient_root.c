@@ -842,3 +842,33 @@ TEST(wc3_ancient_root, spell_structure_filter_tracks_runtime_mode) {
 }
 
 #endif
+
+#ifdef BZ_TESTS
+void S_TestMoveRecoveryTrace(void (*)(void *,unsigned,edict_t const *),void *);
+static void ancient_stop258_recovery(void *data,unsigned stage,edict_t const *unit) {
+    unsigned *stages=data;T_EQ(stage,(*stages)++);T_ASSERT(!G_UnitIsStructure(unit));
+}
+
+/* Authored building identity survives uproot; the live form selects recovery.
+ * Retail's etol witness retains10000 but sets low-byte80, entering ordinary
+ * unit/bridge recovery and toggling its three footprint regions. */
+TEST(wc3_ancient_root, stop258_uprooted_form_recovers_despite_authored_building_identity) {
+    reset_entities();setup_test_world();uint8_t cells[64*64]={0};
+    CM_SetupTestWorldBounds(&(box2_t){{0,0},{2048,2048}});CM_SetupTestPathmap(64,64,cells);
+    slkTestData_t *rows=parse_slk_string(ancient_root_tft),*old=G_SetSLKRows("AbilityData",rows);
+    edict_t *unit=ancient_test_unit(true);unit->collision=16;
+    unit->s.origin2=(vec2_t){1024,1024};G_PublishMoveSpatialObject(unit);
+    T_ASSERT(G_UnitIsBuilding(unit->class_id));T_ASSERT(G_UnitIsStructure(unit));
+    unsigned stages=0;S_TestMoveRecoveryTrace(ancient_stop258_recovery,&stages);
+    T_ASSERT(unit_issueimmediateorder(unit,"stop"));T_EQ(stages,0);
+    S_TestMoveRecoveryTrace(NULL,NULL);
+    T_ASSERT(unit_issueimmediateorder(unit,"unroot"));
+    level.time=unit->ancient_root->transition_end_time;ancient_update(unit);
+    T_EQ(unit->ancient_root->mode,ANCIENT_UPROOTED);
+    T_ASSERT(G_UnitIsBuilding(unit->class_id));T_ASSERT(!G_UnitIsStructure(unit));
+    stages=0;S_TestMoveRecoveryTrace(ancient_stop258_recovery,&stages);
+    T_ASSERT(unit_issueimmediateorder(unit,"stop"));
+    S_TestMoveRecoveryTrace(NULL,NULL);T_EQ(stages,4);
+    reset_entities();G_SetSLKRows("AbilityData",old);free_slk_rows(rows);setup_test_world();
+}
+#endif

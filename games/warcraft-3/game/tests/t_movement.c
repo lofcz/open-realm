@@ -23093,3 +23093,45 @@ TEST(wc3_movement, stop257_unit_scope_excludes_all_regions_after_save_and_restor
     remove(file);reset_entities();setup_test_world();
 }
 #endif
+
+#ifdef BZ_TESTS
+static void stop258_unexpected_recovery(void *data,unsigned stage,edict_t const *unit) {
+    (void)stage;(void)unit;(*(unsigned *)data)++;
+}
+
+/* Structure Stop has no Move cleanup owner. The internal support helper's
+ * structure branch still cancels motion but supplies no placement callback.
+ * Neither entry may relocate a structure through blocked terrain. */
+TEST(wc3_movement, stop258_structure_stop_and_support_skip_embedded_placement) {
+    FOR_LOOP(kind,3)FOR_LOOP(cls,4)FOR_LOOP(entry,2)FOR_LOOP(saved,2) {
+        reset_entities();setup_test_world();uint8_t cells[64*64]={0};
+        CM_SetupTestWorldBounds(&(box2_t){{0,0},{2048,2048}});CM_SetupTestPathmap(64,64,cells);
+        T_ASSERT(run_test_jass("globals\nunit structure258\nendglobals\n"
+            "function main takes nothing returns nothing\n"
+            "set structure258=CreateUnit(Player(0),'hbar',656,656,0)\nendfunction\n"));
+        edict_t *unit=NULL;FILTER_EDICTS(ent,ent->inuse && ent->class_id==MAKEFOURCC('h','b','a','r'))unit=ent;
+        T_NOT_NULL(unit);if(!unit)continue;T_ASSERT(G_UnitIsStructure(unit));
+        unit->collision=(.25f+.5f*cls)*32;
+        S_SetUnitPosition(unit,&(vec2_t){656,656});G_PublishMoveSpatialObject(unit);
+        if(kind==1)for(unsigned y=19;y<=21;y++)for(unsigned x=19;x<=21;x++)cells[y*64+x]=2;
+        if(kind==2)for(unsigned y=8;y<=32;y++)for(unsigned x=8;x<=32;x++)cells[y*64+x]=2;
+        CM_SetupTestPathmap(64,64,cells);G_PublishMoveSpatialObject(unit);
+        unsigned index=unit-g_edicts;
+        if(saved) {
+            cstring_t file=Test_TempPath("wc3-stop258.bin");
+            T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);unit=g_edicts+index;
+        }
+        wc3RecordObject_t *record=wc3_records_owned(S_GetMoveFineSpatial(),index);
+        T_NOT_NULL(record);if(!record)continue;record->flags=3;
+        unsigned stages=0;S_TestMoveRecoveryTrace(stop258_unexpected_recovery,&stages);
+        if(entry)S_StopUnitMovementWithRecovery(unit);
+        else T_ASSERT(unit_issueimmediateorder(unit,"stop"));
+        S_TestMoveRecoveryTrace(NULL,NULL);T_EQ(stages,0);
+        T_EQ(wc3_records_owned(S_GetMoveFineSpatial(),index)->flags,3);
+        T_EQ(wc3_float_bits(unit->s.origin2.x),wc3_float_bits(656));
+        T_EQ(wc3_float_bits(unit->s.origin2.y),wc3_float_bits(656));
+        T_EQ(unit->current_order_id,0);T_NULL(move_unit_group(unit));
+    }
+    reset_entities();setup_test_world();
+}
+#endif
