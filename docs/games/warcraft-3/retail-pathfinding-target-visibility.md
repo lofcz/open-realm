@@ -695,3 +695,69 @@ controllers. The external archive is `research/TARGET-03.2/payoff255/`.
   --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
   --report /tmp/guard255-fresh.json
 ```
+
+### Complete listed target-loss and reacquisition policies (Payoff256)
+
+TARGET-03.2 closes the17 delivered loss policies and5 short-fog reacquisition
+policies. The engine implementations from166..255 remain the owners; this
+checkpoint joins their regressions to the immutable retail scene contracts and
+adds the missing compositions. It introduces no case-specific movement rules.
+
+| Delivered policy | Production regression coverage |
+|---|---|
+| Persistent/approaching Smart hidden arrival | target166 hidden arrival and exact public fog trajectory |
+| Shared vision overridden by afterUnits fog | target256 after_units_fog |
+| Undetected/owned/shared Apiv loss | target168 approach/persistent and exact fade timer tests |
+| RemoveUnit / KillUnit | public_smart_follow original target remove/kill reuse trajectories |
+| ShowUnit / cargo entry and undo | target167 synchronous world-presence producer tests |
+| Blink temporary visibility window | target182 public Blink, nested/dead/fog checks |
+| Owner transfer | target221 public transfer, immediate recovery and saved ownership |
+| Paused target | target256 paused_target through cold save and delayed resume |
+| Already fogged target at order time | target166 refusal and target251 admission/FIFO tests |
+| Smart issued during Apiv fade, then explicit reissue | target256 order_during_fade with non-stock2.75 authored duration |
+| Attack invisibility/fog | target223 synchronous loss/recovery and target222 cached hidden chase |
+| Five short-fog reacquisitions | target256 Smart persistent/approach, Attack and Move, each fresh and saved; exact original Smart252/254 rows retained |
+
+The new reacquisition test retains14/40/26/13/13 hidden visits in minimal
+arenas, then checks the remaining countdown before the first new target sample.
+A target becoming visible clears unseen immediately but does not bypass that
+countdown or replace the physical owner. Hidden cached destinations, owner
+identity and public head survive a cold save in each composition.
+
+The pause composition exposed a production gap. `S_RunMoveTimers` restored the
+retained point command at its delayed deadline but did not create its physical
+group. This left movement to the ordinary entity-order fallback. Both original
+loss captures instead show the new target group first at counter9491 after
+unpause9490, ahead of the retained follower group; the target gains velocity at
+9492. The old paused target group has one zero-velocity retirement visit9291.
+The engine now creates the new group when delayed resume activates its task,
+without publishing another user-issued order event. No save layout changes.
+
+The first new regression failed because the target remained outside the physical
+owner scheduler. An initial harness also omitted `S_RunMoveTimers`; correcting
+that omission alone still failed. After the engine fix, the paused target moves
+through the owner pass and the follower retains its original identity. The
+unchanged pause86 regression still matches773 original commits and6171 saved
+continuation commits. No expectation was rewritten to accept the change.
+
+`retail-target-policies256-1.27.json` assigns every delivered scene to executable
+engine tests, pins the existing research expectations, retains the two original
+resume-owner witnesses and516 original instruction guards. The verifier reruns
+the complete six-capture166 audit, including all repeated policy states and
+observer-free public markers, before executing the selected engine cases.
+`Work256Evidence.java` and `MapPathfinding.java` save the policy/owner joins in
+Ghidra; final saved-program readback is identical.
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_target_policies256.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --archive /GitHub/wc3-analysis/reports/pathfinding-1.27/research \
+  --report /tmp/target-policies256-fresh.json
+```
+
+This closes the listed policy outcomes and resulting owner/order/route behavior.
+It does not certify every movement word in all22 full retail scenes: those
+geometry, numeric, target-family and multi-member domains retain their existing
+TARGET-02.1, NUM-02.3 and group task ownership. Earlier exact166/252/254 and86
+fixtures remain unchanged. No new original save or live capture is claimed at
+this checkpoint; the immutable delivered captures are reverified directly.

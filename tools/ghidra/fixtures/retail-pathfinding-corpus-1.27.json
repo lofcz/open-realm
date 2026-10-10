@@ -18,7 +18,7 @@
     "archive": "Local report root containing the frozen JSONL inputs.",
     "engine": "Fresh compiled wc3_pathing_engine_probe.c library."
   },
-  "scope": "210 executable original/evidence contracts;491 total entries.",
+  "scope": "211 executable original/evidence contracts;492 total entries.",
   "entries": [
     {
       "id": "oracle-adaptive",
@@ -51114,6 +51114,53 @@
         "Original guard polls rearm via0542d0/053630, not the agent054370/053710. Four rearms per repeat preserve serial and request identity; canceled initial/replaced/retired requests pop silently.",
         "Engine ordered-drain/save regression covers tied two-unit cohorts and a late drain; the retained target254 trajectory remains word-exact through1723. No existing expected fixture is rewritten and no broader target-policy closure is claimed."
       ]
+    },
+    {
+      "id": "oracle-target-policies256",
+      "kind": "oracle",
+      "command": [
+        "{python}",
+        "tools/ghidra/verify_wc3_pathing_target_policies256.py",
+        "--binary",
+        "{binary}",
+        "--archive",
+        "{archive}",
+        "--report",
+        "{report}"
+      ],
+      "inputs": {
+        "binary_sha256": "d51e5680243fc90e19c9d6074f7fac433c466d3cf5f46e2364291725574d8236"
+      },
+      "report": "target-policies256.json",
+      "expected_exit": 0,
+      "expected_status": "verified",
+      "checks": {
+        "passed": {
+          "equal": true
+        },
+        "policies": {
+          "equal": 22
+        },
+        "resume_repeats": {
+          "equal": 2
+        },
+        "instructions": {
+          "equal": 516
+        },
+        "engine": {
+          "length": 2
+        }
+      },
+      "evidence": [
+        "S",
+        "L"
+      ],
+      "scope": "All17 loss and5 reacquisition policy outcomes, actual resumed physical owner and production owner/order/route/save compositions; retains earlier raw trajectory expectations.",
+      "exclusions": [
+        "Closes the listed17 loss and5 reacquisition policies using existing repeated public retail captures and actual engine owner regressions. The complete captured outcomes and native words remain immutable.",
+        "The new engine policy compositions use minimal arenas. Exact full geometry and trajectories for every22 scene are not claimed; remaining numeric/target/mode/group domains retain their owning open TODOs. Earlier raw166/252/254 trajectories and pause86 remain acceptance checks.",
+        "No new live process is launched: all6 completed public/control captures are reverified from the delivered immutable archive. Engine cold saves compare continuation with uninterrupted retail captures, not a new original save file."
+      ]
     }
   ],
   "fixtures": [
@@ -52012,7 +52059,7 @@
     },
     {
       "path": "tools/ghidra/MapPathfinding.java",
-      "sha256": "67f58d88075e323fca293d981b721100654bc28aef354782320e749a90885a16"
+      "sha256": "477a3cd29c0597dab6a031a2b916f765accf85e52485576c79f509d8e0696c7d"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_metadata_busy_motion_119.h",
@@ -52868,7 +52915,7 @@
     },
     {
       "path": "games/warcraft-3/game/skills/s_move.c",
-      "sha256": "016221fce8da7e5ab866c211a269a2e5cde7b27bdda7d539deaed651a8b5d3bb"
+      "sha256": "6f88e8f3731a4af7271f6bd0c06dbc805f7b088972f58e89012c8091591d0a99"
     },
     {
       "path": "tools/ghidra/verify_wc3_pathing_spatial_save.py",
@@ -53560,7 +53607,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_movement.c",
-      "sha256": "a71a3169c5be3821bee10e6f6546ac3c9f968653efad3e69df0c23089611bf5b"
+      "sha256": "d9661c413043828a5411fdad46e3463032c146eb5356761f2c679db02e32f159"
     },
     {
       "path": "games/warcraft-3/game/tests/t_repulsion_crowds.c",
@@ -53804,7 +53851,7 @@
     },
     {
       "path": "tests/test_wc3_pathfinding_corpus.py",
-      "sha256": "454edbed7f190ca401a350f9f9b83ad10498547db21e7c2eb8ce2d8cf6b5a10b"
+      "sha256": "16ff04a98ded29ae140acbc7f6c1b24a2d3a5b00d8e2d7c7e0dc1cd58681367b"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-group-speed.md",
@@ -53820,7 +53867,7 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-todo.md",
-      "sha256": "79a21ec5903bd9cf5adb2aece638388acc19f32946f1c5baa8d10ec8288c9adf"
+      "sha256": "682841015b18adf5a94eff85782967bfc765fe8935166008e45092dfc84a29af"
     },
     {
       "path": "games/warcraft-3/game/g_timer.c",
@@ -54452,7 +54499,7 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-target-visibility.md",
-      "sha256": "2829d1779c9b29e2be546fc9e6dcbb82cb450ae070c8b501b0d8ee7cc0ee4391"
+      "sha256": "4d0d7d53547f38b48e922f68b507eb8ca6590bd9163ae1c06735f75373ef5464"
     },
     {
       "path": "tools/frida/research/target021_analyze.py",
@@ -57649,6 +57696,22 @@
     {
       "path": "tests/test_wc3_pathfinding_guard255.py",
       "sha256": "9890e5b70b069b999e7d3554ea2db3f87879eee250c191ce4d38d2be37625094"
+    },
+    {
+      "path": "tools/ghidra/research/Work256Evidence.java",
+      "sha256": "4971dc6e1ee0aee5e4112f6b6b3b7db911385777fba38deaa0c6d055db729153"
+    },
+    {
+      "path": "tools/ghidra/verify_wc3_pathing_target_policies256.py",
+      "sha256": "7249e000aaf8a6678d7934d4317414a4983e9fc1427ed9dbd3b95a738840baa1"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-target-policies256-1.27.json",
+      "sha256": "4d71d03681fa98df91b2d39be136aaa3005419393070ace52391bacc2b63a90a"
+    },
+    {
+      "path": "tests/test_wc3_pathfinding_target_policies256.py",
+      "sha256": "23ac8e9c6fc84abad3cd8f81f5f3bd4085c4d056c5a95520e475bde6b3842cbb"
     }
   ]
 }

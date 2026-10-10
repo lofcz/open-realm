@@ -55,7 +55,13 @@ because they did not establish an overall performance win. This performance
 work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
-**281 done / 336 tasks; 55 remaining.**
+**282 done / 336 tasks; 54 remaining.**
+Payoff256 closes TARGET-03.2 by joining all17 frozen loss policies and5
+reacquisition policies to production owner regressions. Paused point commands
+now create their fresh physical group on delayed resume, as both original
+captures show. Added shared-fog, paused-target, fade/reissue and five saved
+reacquisition compositions retain existing retail expectations. See
+[target policy closure](retail-pathfinding-target-visibility.md#complete-listed-target-loss-and-reacquisition-policies-payoff256).
 Payoff255 preserves periodic guard request identity and serials across inside
 polls, late draining and cold save. Two original event-clock traces retain all
 earlier trajectory words and show canceled requests popping silently. This fixes
@@ -1404,7 +1410,7 @@ Evidence: [target evidence][R] and [range][M]. Tools/artifacts: target, refresh,
 ### TARGET-03 — Visibility policies
 
 - [x] **TARGET-03.1** Map visibility policy flags/global producers to fog, invisibility and validation results 0xa9/0xaa; publish the reachable branch table. Payoff251 integrates original-policy matrix, lifecycle writers, frozen branch table and optional Move admission regressions. Research handoff: [TARGET-03.1](retail-pathfinding-handoffs/TARGET-03.1/HANDOFF.md).
-- [ ] **TARGET-03.2** Run loss and reacquisition for each listed policy; assert retained pursuit or cancellation and resulting order/route state.
+- [x] **TARGET-03.2** Run loss and reacquisition for each listed policy; assert retained pursuit or cancellation and resulting order/route state.
 
 ### TARGET-04 — Delayed refresh
 

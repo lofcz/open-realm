@@ -46,6 +46,7 @@ typedef struct {
 } moveStep_t;
 
 static entitySet_t move_timer_members, move_visual_members;
+static void move_start_point_group(edict_t *,vec2_t const *,float);
 static void move_visual_track(edict_t *);
 static void move_visual_update(void);
 typedef struct { uint16_t target,prev,next; } moveFollowLink_t;
@@ -1684,8 +1685,13 @@ void S_RunMoveTimers(void) {
         uint32_t order=ent->movement.pause_order_id;
         ent->movement.pause_resume_pending=false;ent->movement.pause_order_id=0;
         S_TrackMoveTimers(ent);
-        if(ent->goalentity && ent->currentmove==&move_move_walk)
+        if(ent->goalentity && ent->currentmove==&move_move_walk) {
             S_IssueMoveOrder(ent,ent->goalentity,order);
+            /* Resume activates a new point task without a user-issued event.
+             * Retail's next owner visit includes its fresh physical group;
+             * leaving it detached falls back to entity-order movement. */
+            move_start_point_group(ent,&ent->goalentity->s.origin2,0);
+        }
         else if(!order && ent->current_order_id==MOVE_ORDER_SUSPENDED)ent->current_order_id=0;
     }
     for(uint32_t i=entity_set_next(&move_timer_members,0);i<globals.num_edicts;i=entity_set_next(&move_timer_members,i+1)) {

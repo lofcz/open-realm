@@ -22889,4 +22889,145 @@ TEST(wc3_movement, target254_neutral_guard_restart_matches_retained_retail_rows)
     target252_replay(1723);
 }
 
+/* Complete the policy compositions in TARGET-03.2. These use the small test
+ * arena: native scene counters/trajectories remain in the frozen retail corpus.
+ * The assertions concern loss, retained ownership and refresh ordering. */
+TEST(wc3_movement, target256_reacquisition_keeps_countdown_across_target_owners_and_save) {
+    static struct {cstring_t order;unsigned hidden;bool approach;} const cases[]={
+        {"smart",14,false},{"smart",40,true},{"smart",26,false},
+        {"attack",13,true},{"move",13,false}
+    };
+    FOR_LOOP(n,sizeof(cases)/sizeof(*cases))FOR_LOOP(saved,2) {
+        edict_t *unit,*target;target166_setup(&unit,&target);
+        if(cases[n].approach)S_SetUnitAxisPosition(target,0,1536);
+        if(n==3)target222_arm(unit,target,111);
+        T_ASSERT(unit_issuetargetorder(unit,cases[n].order,target));
+        if(n==3)unit->currentmove->think(unit);
+        if(!cases[n].approach)FOR_LOOP(i,100) {
+            target166_tick();if(move_unit_group(unit) && (move_unit_group(unit)->flags&1))break;
+        }
+        moveGroup_t *group=move_unit_group(unit);T_NOT_NULL(group);if(!group)continue;
+        target166_tick();T_EQ((group->flags&1)!=0,!cases[n].approach);
+        vec2_t cached=group->route.group_goal;uint64_t sequence=group->sequence;
+        fogModifier_t *fog=G_FogModifierCreate();T_NOT_NULL(fog);if(!fog)continue;
+        *fog=(fogModifier_t){.player=0,.state=WC3_FOG_STATE_FOGGED,.center={1024,1024},.radius=2000};
+        uint32_t fog_id;T_ASSERT(G_FogModifierId(fog,&fog_id));
+        G_FogModifierStart(fog);T_ASSERT(!G_FowPlayerCanTrackUnit(0,target));
+        S_SetUnitAxisPosition(target,1,1280);
+        FOR_LOOP(i,cases[n].hidden) {
+            int32_t countdown=group->target_refresh;
+            target166_tick();
+            T_EQ(group->unseen_counter,i+1);T_EQ(group->target_refresh,countdown ? countdown-1 : 0);
+            T_EQ(group->route.group_goal.x,cached.x);T_EQ(group->route.group_goal.y,cached.y);
+            T_EQ(move_unit_group(unit),group);
+            if(saved && i==1) {
+                cstring_t file=Test_TempPath("wc3-target256-hidden.bin");
+                T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+                group=move_unit_group(unit);T_NOT_NULL(group);if(!group)break;
+                T_EQ(group->sequence,sequence);T_EQ(group->unseen_counter,i+1);
+            }
+        }
+        fog=G_FogModifierById(fog_id);T_NOT_NULL(fog);if(fog)G_FogModifierDestroy(fog);
+        G_FowUpdate();T_ASSERT(G_FowPlayerCanTrackUnit(0,target));
+        int32_t remaining=group->target_refresh;
+        FOR_LOOP(i,(unsigned)remaining) {
+            target166_tick();T_EQ(group->unseen_counter,0);
+            T_EQ(group->route.group_goal.y,cached.y);
+            T_EQ(group->target_refresh,remaining-i-1);
+        }
+        /* Reacquisition alone does not force a sample; the first visit with
+         * countdown zero samples the target's new cell. */
+        target166_tick();T_EQ(group->unseen_counter,0);
+        T_EQ(group->route.group_goal.y,40);T_ASSERT(group->target_refresh>0);
+        T_EQ(move_unit_group(unit),group);T_EQ(group->sequence,sequence);
+        T_EQ(unit->current_order_id,G_OrderId(cases[n].order));T_EQ(group->target,target);
+        G_FowShutdown();reset_entities();setup_test_world();
+    }
+}
+
+TEST(wc3_movement, target256_after_units_fog_overrides_shared_target_vision_until_cancellation) {
+    edict_t *unit,*target;target166_setup(&unit,&target);
+    target->s.player=PLAYER_NEUTRAL_PASSIVE;
+    level.alliances[PLAYER_NEUTRAL_PASSIVE][0]|=1u<<ALLIANCE_SHARED_VISION;
+    T_ASSERT(unit_issuetargetorder(unit,"smart",target));
+    FOR_LOOP(i,100) {target166_tick();if(move_unit_group(unit) && (move_unit_group(unit)->flags&1))break;}
+    T_ASSERT(move_unit_group(unit) && (move_unit_group(unit)->flags&1));
+    T_ASSERT(run_test_jass("type fogmodifier extends handle\nglobals\nunit target\nfogmodifier fog\nendglobals\n"
+        "function obscure takes nothing returns nothing\n"
+        "set fog=CreateFogModifierRadius(Player(0),FOG_OF_WAR_FOGGED,672,256,900,false,true)\n"
+        "call FogModifierStart(fog)\nendfunction\n"
+        "function reveal takes nothing returns nothing\ncall DestroyFogModifier(fog)\nendfunction\n"
+        "function main takes nothing returns nothing\nlocal group g=CreateGroup()\n"
+        "call GroupEnumUnitsInRange(g,672,256,1,null)\nset target=FirstOfGroup(g)\n"
+        "call DestroyGroup(g)\nendfunction\n"));
+    target217_call("obscure");T_ASSERT(!G_FowPlayerCanTrackUnit(0,target));
+    T_EQ(S_MoveTargetStatus(unit,target),MOVE_TARGET_LOST);
+    FOR_LOOP(i,160) {target166_tick();if(!unit->current_order_id)break;}
+    T_EQ(unit->current_order_id,0);T_NULL(unit->movement.follow_target);T_EQ(unit->movement.group_id,0);
+    target217_call("reveal");G_FowUpdate();T_ASSERT(G_FowPlayerCanTrackUnit(0,target));
+    FOR_LOOP(i,20)target166_tick();
+    T_EQ(unit->current_order_id,0);T_NULL(unit->goalentity);
+    G_FowShutdown();reset_entities();setup_test_world();
+}
+
+TEST(wc3_movement, target256_paused_target_retains_follow_and_resumes_after_cold_save) {
+    edict_t *unit,*target;target166_setup(&unit,&target);
+    T_ASSERT(unit_issuetargetorder(unit,"smart",target));
+    FOR_LOOP(i,100) {target166_tick();if(move_unit_group(unit) && (move_unit_group(unit)->flags&1))break;}
+    T_ASSERT(move_unit_group(unit) && (move_unit_group(unit)->flags&1));
+    T_ASSERT(unit_issueorder(target,"move",&(vec2_t){672,1536}));FOR_LOOP(i,10)target166_tick();
+    T_ASSERT(run_test_jass("globals\nunit target\nendglobals\n"
+        "function suspend takes nothing returns nothing\ncall PauseUnit(target,true)\nendfunction\n"
+        "function resume takes nothing returns nothing\ncall PauseUnit(target,false)\nendfunction\n"
+        "function main takes nothing returns nothing\nlocal group g=CreateGroup()\n"
+        "call GroupEnumUnitsInRange(g,672,400,256,null)\n"
+        "loop\nset target=FirstOfGroup(g)\nexitwhen target==null or GetUnitCurrentOrder(target)==OrderId(\"move\")\n"
+        "call GroupRemoveUnit(g,target)\nendloop\ncall DestroyGroup(g)\nendfunction\n"));
+    uint64_t sequence=move_unit_group(unit)->sequence;move_follow_visits=0;
+    target217_call("suspend");T_ASSERT(target->paused);T_EQ(move_follow_visits,0);
+    wc3GridPose_t paused;unit_predicted_pose(target,&paused);
+    cstring_t file=Test_TempPath("wc3-target256-pause.bin");
+    T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+    FOR_LOOP(i,50) {
+        target166_tick();wc3GridPose_t pose;unit_predicted_pose(target,&pose);
+        T_EQ(pose.grid[0],paused.grid[0]);T_EQ(pose.grid[1],paused.grid[1]);
+        T_EQ(unit->current_order_id,G_OrderId("smart"));T_EQ(unit->movement.follow_target,target);
+        T_EQ(move_unit_group(unit)->sequence,sequence);
+    }
+    target217_call("resume");T_ASSERT(!target->paused);T_EQ(move_follow_visits,0);
+    FOR_LOOP(i,20) {target166_tick();S_RunMoveTimers();}
+    T_NOT_NULL(move_unit_group(target));
+    wc3GridPose_t moved;unit_predicted_pose(target,&moved);T_ASSERT(moved.grid[1]>paused.grid[1]);
+    T_EQ(unit->current_order_id,G_OrderId("smart"));T_EQ(unit->movement.follow_target,target);
+    G_FowShutdown();reset_entities();setup_test_world();
+}
+
+TEST(wc3_movement, target256_order_during_fade_cancels_then_requires_explicit_reissue) {
+    edict_t *unit,*target;target166_setup(&unit,&target);target->s.player=PLAYER_NEUTRAL_PASSIVE;
+    slkTestData_t *rows=parse_slk_string("ID;PWXL;N;E\nC;Y1;X1;K\"alias\"\nC;X2;K\"code\"\n"
+        "C;X3;K\"levels\"\nC;X4;K\"Dur1\"\nC;Y2;X1;K\"Apiv\"\nC;X2;K\"Apiv\"\n"
+        "C;X3;K1\nC;X4;K\"2.75\"\nE\n");
+    slkTestData_t *old=G_SetSLKRows("AbilityData",rows);
+    T_ASSERT(run_test_jass("globals\nunit source\nunit target\nendglobals\n"
+        "function add takes nothing returns nothing\ncall UnitAddAbility(target,'Apiv')\nendfunction\n"
+        "function undo takes nothing returns nothing\ncall UnitRemoveAbility(target,'Apiv')\nendfunction\n"
+        "function issue takes nothing returns nothing\n"
+        "call BJassAssert(IssueTargetOrder(source,\"smart\",target),\"visible/fading target accepted\")\nendfunction\n"
+        "function main takes nothing returns nothing\nlocal group g=CreateGroup()\n"
+        "call GroupEnumUnitsInRange(g,672,256,1,null)\nset target=FirstOfGroup(g)\ncall GroupClear(g)\n"
+        "call GroupEnumUnitsInRange(g,256,256,1,null)\nset source=FirstOfGroup(g)\ncall DestroyGroup(g)\nendfunction\n"));
+    target217_call("add");T_ASSERT(target->permanent_invisibility_fade.request.active);
+    FOR_LOOP(i,10) {target166_tick();target168_run_timers();}
+    T_ASSERT(!S_PermanentInvisibilityActive(target));target217_call("issue");
+    FOR_LOOP(i,100) {target166_tick();target168_run_timers();if(S_PermanentInvisibilityActive(target))break;}
+    T_ASSERT(S_PermanentInvisibilityActive(target));T_EQ(unit->current_order_id,0);
+    T_NULL(unit->movement.follow_target);T_EQ(unit->movement.group_id,0);
+    target217_call("undo");T_ASSERT(!S_PermanentInvisibilityActive(target));
+    FOR_LOOP(i,20)target166_tick();
+    T_EQ(unit->current_order_id,0);
+    target217_call("issue");FOR_LOOP(i,20)target166_tick();
+    T_EQ(unit->current_order_id,G_OrderId("smart"));T_EQ(unit->movement.follow_target,target);
+    G_SetSLKRows("AbilityData",old);free_slk_rows(rows);G_FowShutdown();reset_entities();setup_test_world();
+}
+
 #endif
