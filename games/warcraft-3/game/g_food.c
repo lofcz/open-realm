@@ -182,6 +182,8 @@ void G_SetUnitPlayer(edict_t *unit, uint32_t player) {
     S_UnitAbilityEvent(unit, A_UNIT_OWNER_CHANGED);
     G_PublishChangeOwnerEvents(unit, old_player);
     S_UnitTargetOwnerChanged(unit);
+    /* Original6991a2: d01a5 follows the synchronous d01a2 subscribers. */
+    S_UnitTargetAvailable(unit);
     /* Native698ce0 publishes the owner event before9b9230 ->9c3660 reinserts
      * into the new owner's head. Same-owner calls retain their pool position. */
     G_UnitOwnerInsert(unit);

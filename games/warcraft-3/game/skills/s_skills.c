@@ -1533,6 +1533,11 @@ void S_UnitTargetLost(edict_t *target) {
     unit_dispatch_engine_event_abilities(NULL,A_TARGET_LOST,&call);
 }
 
+void S_UnitTargetAvailable(edict_t *target) {
+    abilityCall_t call={.lost_target=target};
+    unit_dispatch_engine_event_abilities(NULL,A_TARGET_AVAILABLE,&call);
+}
+
 void S_UnitTargetOwnerChanged(edict_t *target) {
     abilityCall_t call={.lost_target=target};
     unit_dispatch_engine_event_abilities(NULL,A_TARGET_OWNER_CHANGED,&call);

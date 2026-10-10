@@ -1719,6 +1719,51 @@ static void ai_attackmove_walk(edict_t *ent) {
 
 static umove_t attackmove_move_walk = { "walk", ai_attackmove_walk, NULL, CAbilityAttack };
 
+/* Original6510b0 broadcasts d01a5 through the widget index. Ordinary pose
+ * publication does not produce this event. Keep the materialized list private
+ * across callbacks, as for help notifications, and validate retained identities. */
+#define ATTACK_AVAILABILITY_RADIUS 1100.0f /* Original0153f0 -> d70744. */
+static void attack_target_available(edict_t *target) {
+    if(!target || !target->inuse || G_IsDeferredFree(target))return;
+    attackHelpQuery_t *query=attack_help_queries;
+    if(query)attack_help_queries=query->next;
+    else if(!(query=calloc(1,sizeof(*query))))gi.error("Attack: cannot acquire availability query");
+    query->count=0;query->owners=UINT32_MAX;
+    uint32_t birth=target->spawn_time;
+    box2_t bounds=CM_GetWorldBounds();
+    vec2_t center=attack_help_fine_position(target,bounds);
+    float radius=wc3_div(ATTACK_AVAILABILITY_RADIUS,32);
+    S_QueryMoveProximityContext(NULL,(float[]){center.x,center.y},radius,attack_help_collect,query);
+    FOR_LOOP(i,query->count) {
+        if(!target->inuse || target->spawn_time!=birth || G_IsDeferredFree(target))break;
+        attackHelpMember_t member=query->members[i];edict_t *unit=g_edicts+member.index;
+        if(!unit->inuse || unit->spawn_time!=member.birth || G_IsDeferredFree(unit) ||
+            unit==target || M_IsDead(unit) || unit->paused || (unit->s.renderfx&RF_HIDDEN) ||
+            !(unit->svflags&SVF_MONSTER) || !attack_cap_present(unit))continue;
+        vec2_t point=attack_help_fine_position(unit,bounds);
+        float dx=wc3_sub(point.x,center.x),dy=wc3_sub(point.y,center.y);
+        float reach=wc3_add(radius,wc3_div(MAX(1,unit->collision),32));
+        if(wc3_add(wc3_mul(dx,dx),wc3_mul(dy,dy))>wc3_mul(reach,reach))continue;
+        /*49e130.4000: explicit Move and other active owners suppress Attack's
+         * acquisition. Attack Move retains its waypoint and public head. */
+        if(unit->currentmove && unit->currentmove->proc!=CAbilityAttack &&
+            unit->currentmove->think!=ai_stand)continue;
+        if(S_UnitIsCycloned(unit) || !S_HumanCanAttack(unit) || !S_CargoAttacksEnabled(unit) ||
+            G_PlayerTreatsPlayerAsAlly(unit->s.player,target->s.player) ||
+            target->invulnerable || S_UnitAbilityEvent(unit,A_NO_ACQUIRE) ||
+            S_UnitAbilityEvent(target,A_NO_ACQUIRE) || !S_AttackCanAutoAcquire(unit,target) ||
+            !G_FowPlayerCanTrackUnit(unit->s.player,target))continue;
+        float range=G_AcquisitionRange(unit);
+        /*49e256 passes prediction selector0: stored centers, both radii. */
+        if(!S_UnitTargetInCommittedMoveRange(unit,target,range))continue;
+        attack_cap_begin(unit);
+        /* The exemption precedes target replacement. Retained combat keeps
+         * its target here; the wider49d680 ranking remains independently owned. */
+        if(!unit->attack_target)order_attack(unit,target);
+    }
+    query->next=attack_help_queries;attack_help_queries=query;
+}
+
 /* Begin (or resume, after a kill) attack-moving toward a waypoint. */
 void order_attackmove(edict_t *self, edict_t *waypoint) {
     if (S_GoldMineWorkerIsInside(self))
@@ -1765,7 +1810,10 @@ BZ_ABILITY_PROC(CAbilityAttack) {
         FOR_LOOP(slot,2)if(S_AttackProfileRead(ent,slot)->type!=ATK_NONE)return true;
         return false;
     case A_UNIT_EVENT_MASK:
-        return UNIT_MESSAGE_SUBSCRIPTIONS(A_AUTO_COMBAT_START,A_COMBAT_ALERT,A_ALLY_COMBAT_ALERT,A_UNIT_REMOVE,A_UNIT_REMOVING,A_UNIT_RETIRE,A_DEATH,A_MOVE_LEAVE,A_TARGET_LOST,A_ORDER_ACCEPTED,A_UNIT_STAND,A_UNIT_OWNER_CHANGING);
+        return UNIT_MESSAGE_SUBSCRIPTIONS(A_AUTO_COMBAT_START,A_COMBAT_ALERT,A_ALLY_COMBAT_ALERT,A_UNIT_REMOVE,A_UNIT_REMOVING,A_UNIT_RETIRE,A_DEATH,A_MOVE_LEAVE,A_TARGET_LOST,A_ORDER_ACCEPTED,A_UNIT_STAND,A_UNIT_OWNER_CHANGING,A_TARGET_AVAILABLE);
+    case A_TARGET_AVAILABLE:
+        if(!ent && call)attack_target_available(call->lost_target);
+        return false;
     case A_TARGET_ORDER_ADMIT: {
         if (!ent || !call || !call->issued_target_order.order ||
             (strcmp(call->issued_target_order.order,"attack") &&

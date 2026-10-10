@@ -18,7 +18,7 @@
     "archive": "Local report root containing the frozen JSONL inputs.",
     "engine": "Fresh compiled wc3_pathing_engine_probe.c library."
   },
-  "scope": "214 executable original/evidence contracts;495 total entries.",
+  "scope": "215 executable original/evidence contracts;496 total entries.",
   "entries": [
     {
       "id": "oracle-adaptive",
@@ -51346,6 +51346,65 @@
         "The finite DFA graph proves numeric language transitions. Engine source size/token limits and arbitrary malformed nonnumeric syntax are outside this numeric-domain closure.",
         "Existing retail numeric scalar/conversion fixtures are unchanged. Replaced older engine-only nan/inf guard was explicitly provisional; no former retail literal or expected numeric word was edited."
       ]
+    },
+    {
+      "id": "oracle-availability260",
+      "kind": "oracle",
+      "command": [
+        "{python}",
+        "tools/ghidra/verify_wc3_pathing_availability260.py",
+        "--binary",
+        "{binary}",
+        "--report",
+        "{report}"
+      ],
+      "inputs": {
+        "binary_sha256": "d51e5680243fc90e19c9d6074f7fac433c466d3cf5f46e2364291725574d8236"
+      },
+      "report": "availability260.json",
+      "expected_exit": 0,
+      "expected_status": "verified",
+      "checks": {
+        "passed": {
+          "equal": true
+        },
+        "captures": {
+          "equal": 2
+        },
+        "controls": {
+          "equal": 1
+        },
+        "public_markers": {
+          "equal": 30
+        },
+        "notifications": {
+          "equal": 40
+        },
+        "exemptions": {
+          "equal": 10
+        },
+        "range_decisions": {
+          "equal": 36
+        },
+        "instructions": {
+          "equal": 1355
+        },
+        "engine": {
+          "length": 2
+        }
+      },
+      "evidence": [
+        "S",
+        "L"
+      ],
+      "scope": "Original target availability owner-change producer, repeated/control synchronous notification/range/exemption decisions and actual engine ownership/order regressions.",
+      "exclusions": [
+        "Bounded owner-transfer producer integration; GROUP-03.2 remains open.",
+        "Full49d680 target replacement ranking, neutral/captain guards and other availability producers remain outside engine parity claim.",
+        "Unit284/288 cached sample words are retained raw but excluded from repeat projection; public committed positions and original range decisions are compared.",
+        "Preliminary allied-map and wrong-case preload captures are retained, excluded from accepted evidence.",
+        "No full retail trajectory or performance claim is inferred from these synchronous acquisition captures."
+      ]
     }
   ],
   "fixtures": [
@@ -52244,7 +52303,7 @@
     },
     {
       "path": "tools/ghidra/MapPathfinding.java",
-      "sha256": "81a815fd6066efde1de10f7d5c6de6b82bbce42fcf765be6c23221d9d1cea51c"
+      "sha256": "c4af5ad781c89dcf8a0823195fd04a23c026cfdcaa365c6522fd2311d0aaa505"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_metadata_busy_motion_119.h",
@@ -53544,7 +53603,7 @@
     },
     {
       "path": "games/warcraft-3/game/g_local.h",
-      "sha256": "1d25c39e60a7fa00bf94e518554d2dbe4d22cc12c5ac4f428f4c0cde94e61550"
+      "sha256": "a2122c7c5da6d05849f0da2dce657c8865b941116dd414e9b24825ef61f91a86"
     },
     {
       "path": "games/warcraft-3/common/wc3_pathing_regions.h",
@@ -54036,7 +54095,7 @@
     },
     {
       "path": "tests/test_wc3_pathfinding_corpus.py",
-      "sha256": "36808d3f41870f2fb6e827b0e4ef0ddb11b0a6f67008feb4cb1bab690e4fd09a"
+      "sha256": "36b575605354b36a051c0fccc4ead1e80441edb8e8b3a7da34daa7ec82359679"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-group-speed.md",
@@ -54048,11 +54107,11 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-engine.md",
-      "sha256": "7d33f709ed67425b5bb532a006ced3b753e20a2d6705c2ecb725c855826bafa8"
+      "sha256": "0b59fdc6c59971e43faed72a0c6f4e3295025db30c60538d02305cdc356556f5"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-todo.md",
-      "sha256": "2cbdf4aed91e06e88d86ae2743e74589c3e5d214e1b9689806170a4675586f68"
+      "sha256": "639c29a34302ea5f0de5d86829657399c0a37a789fce8f4a015b7de843e2fae5"
     },
     {
       "path": "games/warcraft-3/game/g_timer.c",
@@ -54060,11 +54119,11 @@
     },
     {
       "path": "games/warcraft-3/game/skills/s_attack.c",
-      "sha256": "8d631c5121bbb90ac10ec13f5c290d709e2898450c2ce73d15323039b8c623fd"
+      "sha256": "a7320d6689a992d91ec9d8b4bed50927c9c395be244bc1204a70c81562607759"
     },
     {
       "path": "games/warcraft-3/game/skills/s_skills.c",
-      "sha256": "bd39655a59bfafb9b97abbf74730c0f94c9bcda31ed1a8ba9aa61a3897751382"
+      "sha256": "dcc3eb89c107972994fa3ffa773859ebb9053e743442773137f9df4fd8bfdce7"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_attack_exemption.h",
@@ -54176,7 +54235,7 @@
     },
     {
       "path": "games/warcraft-3/game/g_food.c",
-      "sha256": "8bcf774b987b47b5393735311e08766fb5b0436149c49a976a70e31e3c47c172"
+      "sha256": "fdb4af37131e6115c5be3bce143bb0462231851d7a59576204fb63cbe0114eca"
     },
     {
       "path": "games/warcraft-3/game/g_spawn.c",
@@ -55136,7 +55195,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_order_lifecycle.c",
-      "sha256": "05b539ce7e86a53f0141219953be139e407d2ec684ef2c96f8e5f78f02bb9b08"
+      "sha256": "180975bd2bfe0799ed02b5979675dff5c1d73ec668b31b12c0b2a066cdf147cd"
     },
     {
       "path": "games/warcraft-3/game/tests/t_patrol_orders.c",
@@ -58005,6 +58064,42 @@
     {
       "path": "tests/test_wc3_pathfinding_numeric259.py",
       "sha256": "73596fe597b74d377ffc62dce9b8ac18b7a2f6bda576ad08c0a78584076e496a"
+    },
+    {
+      "path": "tools/ghidra/research/Availability260Evidence.java",
+      "sha256": "699204547c89bb19574995c0ab4fd7e35f874ac38a9b11c92980e5addf4a3a90"
+    },
+    {
+      "path": "tools/frida/research/cap260_capture.py",
+      "sha256": "5970ba0e8dfde2a490165b5cb74968b9b8a5483314674af626f6bc6d4d0de208"
+    },
+    {
+      "path": "tools/frida/research/cap260_observer.js",
+      "sha256": "c1566d8f0d5ded8cd4faf2fb3ffc7ed5614eb6800129018c1cb2788fb03491e3"
+    },
+    {
+      "path": "tools/frida/research/cap260_make_map.py",
+      "sha256": "d63dd9ea673cc0bcdc94d0055e55767449d1f34d49fee098c89d2b5a5c2c0644"
+    },
+    {
+      "path": "tools/frida/research/cap260_probe.j",
+      "sha256": "4a4e91a3d6273e365cabeaf5f5f1506acdd65f13240e0f0a0451da1ad5033479"
+    },
+    {
+      "path": "tools/ghidra/verify_wc3_pathing_availability260.py",
+      "sha256": "b109a9d28d4ccd44a54d3bcb38ca7a7dc5ed9138af27440d9607e8e30fb291ae"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-availability260-1.27.json",
+      "sha256": "3f9fd49ed606aaec5e55d6a7a37e8f1152b9f56b3c285abd2c8ab56f1053bf17"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-availability260-1.27.json.gz",
+      "sha256": "3b46fb5de0a8927905556cb91a17b3291117b285803436ef0481b81fc8d7ef26"
+    },
+    {
+      "path": "tests/test_wc3_pathfinding_availability260.py",
+      "sha256": "0c15a1c25d0c02698c53d7bdbd07b81ca407773b6903e656ae716320455d36dc"
     }
   ]
 }

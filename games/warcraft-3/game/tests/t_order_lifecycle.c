@@ -211,6 +211,37 @@ TEST(wc3_order_lifecycle, queue198_cancel_payload_survives_ring_growth_and_bucke
     reset_entities();setup_test_world();
 }
 
+/* Original public owner transfers: d01a2 subscribers precede d01a5.
+ * Acquisition is synchronous and retains the public head. An explicit Move
+ * has disabled this Attack notification; pausing removes world eligibility. */
+TEST(wc3_order_lifecycle, available260_owner_transfer_acquires_without_waiting_for_ai_poll) {
+    FOR_LOOP(mode,9) {
+        reset_entities();setup_test_world();
+        level.timer_clock_valid=false;level.pathing_clock=(wc3Clock_t){8,0,300};
+        edict_t *unit=review_order_unit(0,0),*target=review_order_unit(256,0);
+        unit->s.model=target->s.model=1;unit->collision=target->collision=16;
+        G_PublishMoveSpatialObject(unit);G_PublishMoveSpatialObject(target);
+        unit->runtime.acquisition_range=300;
+        if(mode==1)T_ASSERT(G_IssueUnitPointOrder(unit,"attack",&(vec2_t){900,0},false,0,0));
+        if(mode==2)T_ASSERT(G_IssueUnitPointOrder(unit,"move",&(vec2_t){900,0},false,0,0));
+        if(mode==3)unit->paused=true;
+        if(mode==4)G_SetPlayerAlliance(&game.clients[0].ps,&game.clients[1].ps,ALLIANCE_PASSIVE,true);
+        if(mode==5){target->s.origin.x=600;gi.LinkEntity(target);G_PublishMoveSpatialObject(target);}
+        if(mode==7)target->invulnerable=true;
+        if(mode==8)target->health.value=0;
+        uint32_t order=unit->current_order_id;
+        if(mode==6)G_SetUnitPlayer(target,0);else G_SetUnitPlayer(target,1);
+        T_EQ(unit->current_order_id,order);
+        if(mode<2) {
+            T_ASSERT(unit->attack_speed_cap.active);
+            T_FEQ(unit->attack_speed_cap.deadline.time,11,0);
+            T_EQ(unit->goalentity,target);
+            if(mode==1)T_NOT_NULL(unit->movement.attackmove_waypoint);
+        } else T_ASSERT(!unit->attack_speed_cap.active);
+    }
+    reset_entities();setup_test_world();
+}
+
 TEST(wc3_order_lifecycle, swing199_explicit_weapons_publish_exemption_before_damage) {
     /* Explicit producers do not pass through automatic acquisition or an
      * attacked/ally-help notification. Chase alone must not release the cap. */

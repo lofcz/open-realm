@@ -16125,3 +16125,67 @@ Evidence: [frozen contract](../../../tools/ghidra/fixtures/retail-numeric259-1.2
 [replayable Ghidra annotations](../../../tools/ghidra/research/Numeric259Evidence.java).
 The complete owned archive is
 `/GitHub/wc3-analysis/reports/pathfinding-1.27/research/NUM-01.15/payoff259/`.
+
+## Target availability reaches nearby Attack subscribers (Payoff260)
+
+A target owner change publishes an independent availability notification after
+its retained-target owner subscribers return. The original `698ce0` delivers
+`d01a2` at `69919d`, calls `6510b0` at `6991a2`, then disables AI mode and
+reenrolls the unit in its owner's pool. Same-owner calls return before these
+steps. Ordinary movement commits do not produce this notification.
+
+`6510b0` constructs a stack event with code `d01a5` and source at `+c`.
+Its widget query uses a fixed 1100-world-unit radius (`0153f0`, `d70744`),
+flags `4bd0000` and callback `6504a0`. The callback tests the candidate's
+subscription, delivers through virtual `+10`, and returns one independently
+of acquisition success. The Attack handler is `49e130`, thiscall with one
+stack event pointer and `RET4`; the previous inferred scalar parameter was
+incorrect. The recovered event structure and both previously unrecognized
+functions are saved in Ghidra and reproduced by `Availability260Evidence.java`.
+
+Two read-only original captures observe four public owner transfers across
+idle, Attack Move, explicit Move and paused actors. Each capture contains
+20 Attack deliveries, 18 configured-range decisions, five successful deep
+admissions and five exemption starts returning to `49e351`. First admission
+at `49e256` passes prediction selector zero: it uses committed mover centers,
+both collision radii and the already verified fine arithmetic. Idle and
+Attack Move acquire synchronously; explicit Move has ability `4000` clear,
+and the paused actor is absent from the widget query. The public head remains
+unchanged. All ten public position/order markers match both repeats and an
+observer-free control.
+
+The engine now publishes `A_TARGET_AVAILABLE` after owner-change subscribers
+and handles it in Attack. The existing ordered proximity index supplies a
+materialized candidate list; generation checks protect delivery against
+removal/reuse, and the borrowed query buffer permits nested notifications.
+Work scales with visited cell links and nearby recipients. No per-frame
+entity scan, movement watcher, or global maximum-range reconstruction is added.
+Acquisition retains Attack Move's waypoint and public head, and uses the
+existing saved three-second exemption timer.
+
+The nine-case engine regression fails six assertions with the producer
+disconnected and passes with it connected. It checks idle and Attack Move
+acquisition, explicit Move, pause, directional alliance, out-of-range targets
+same-owner calls, invulnerable targets and dead targets. Its allocator-only units explicitly receive models,
+collision geometry and spatial publication; an initial incomplete fixture is
+archived separately. Existing retail fixtures remain unchanged.
+
+The immutable `retail-availability260-1.27.json.gz` bundle retains complete
+accepted captures and preload files, with source/map provenance and 1355
+instruction-byte checks. Unit `284/288` cached sample words vary between
+otherwise identical repeats; they remain in the raw bundle but are excluded
+from the notification projection. Public committed coordinates and original
+range results remain exact comparisons. Early allied-map runs and wrong-case
+preload filename attempts are preserved outside accepted evidence. Public
+`SetUnitAcquireRange(...,0)` yielded 500 at delivery for the probe source
+units, so those units were not assumed to have zero acquisition.
+
+**GROUP-03.2 remains open.** Complete `49d680` target replacement priorities,
+retained adjusted-range producers, neutral guards, additional availability
+transitions and broader captain/target-speed domains are not closed by this
+owner-transition integration. Existing combat keeps its target after gaining
+the exemption until that ranking work is integrated. The original exemption
+starts before the ranking decision; a rejected replacement does not undo it.
+
+Evidence archive:
+`/GitHub/wc3-analysis/reports/pathfinding-1.27/research/GROUP-03.2/payoff260/`.

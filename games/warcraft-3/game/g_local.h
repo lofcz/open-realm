@@ -997,6 +997,7 @@ typedef enum {
     A_UNIT_RETIRE,      /* Death/removal commits an inactive unit before ability detach; identity remains valid. */
     A_TARGET_OWNER_CHANGED, /* Retained target's owner event; distinct from TargetLost validation. */
     A_POINT_ORDER_PRIORITY, /* Authored owners reduce the unsigned point-order score. */
+    A_TARGET_AVAILABLE, /* Nearby Attack subscribers reconsider a published target transition. */
     A_NUM_MESSAGES,
 } abilityMsg_t;
 
@@ -3607,6 +3608,7 @@ void S_ClearUnitEventPlans(void);
 void S_UnitTargetRemoved(edict_t *);
 void S_UnitTargetLost(edict_t *);
 void S_UnitTargetOwnerChanged(edict_t *);
+void S_UnitTargetAvailable(edict_t *);
 bool S_UnitAbilityEventWithCall(edict_t *, abilityMsg_t, abilityCall_t const *);
 bool S_UnitAbilityMoveArrive(edict_t *);
 bool S_AncientIsRooted(edict_t const *);
