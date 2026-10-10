@@ -18,7 +18,7 @@
     "archive": "Local report root containing the frozen JSONL inputs.",
     "engine": "Fresh compiled wc3_pathing_engine_probe.c library."
   },
-  "scope": "215 executable original/evidence contracts;496 total entries.",
+  "scope": "216 executable original/evidence contracts;497 total entries.",
   "entries": [
     {
       "id": "oracle-adaptive",
@@ -51405,6 +51405,75 @@
         "Preliminary allied-map and wrong-case preload captures are retained, excluded from accepted evidence.",
         "No full retail trajectory or performance claim is inferred from these synchronous acquisition captures."
       ]
+    },
+    {
+      "id": "oracle-boundary261",
+      "kind": "oracle",
+      "command": [
+        "{python}",
+        "tools/ghidra/verify_wc3_pathing_boundary261.py",
+        "--binary",
+        "{binary}",
+        "--archive",
+        "{archive}/research",
+        "--report",
+        "{report}"
+      ],
+      "inputs": {
+        "binary_sha256": "d51e5680243fc90e19c9d6074f7fac433c466d3cf5f46e2364291725574d8236"
+      },
+      "report": "boundary261.json",
+      "expected_exit": 0,
+      "expected_status": "verified",
+      "checks": {
+        "passed": {
+          "equal": true
+        },
+        "native_repeats": {
+          "equal": 2
+        },
+        "advances": {
+          "equal": 80
+        },
+        "owner_visits": {
+          "equal": 13
+        },
+        "retail_repeats": {
+          "equal": 2
+        },
+        "motion_commits": {
+          "equal": 640
+        },
+        "public_getters": {
+          "equal": 27384
+        },
+        "request_pops": {
+          "equal": 9405
+        },
+        "load_continuation_rows": {
+          "equal": 465
+        },
+        "controls": {
+          "equal": 2
+        },
+        "instructions": {
+          "equal": 339
+        },
+        "engine": {
+          "length": 2
+        }
+      },
+      "evidence": [
+        "S",
+        "O",
+        "L"
+      ],
+      "scope": "Clock rollover and reachable backward UI load; unchanged public motion/request evidence plus controlled original FIFO/elapsed composition and production saved suffix.",
+      "exclusions": [
+        "Controlled starting time299.875, six-advance owner visits, three requesters and supplied over-budget charge per admitted search.",
+        "Original elapsed and scalar integration execute; no full original mover/route or public owner cadence is claimed by this oracle.",
+        "Public natural rollover and backward UI load are separately covered by unchanged Payoff117/181 evidence."
+      ]
     }
   ],
   "fixtures": [
@@ -52303,7 +52372,7 @@
     },
     {
       "path": "tools/ghidra/MapPathfinding.java",
-      "sha256": "c4af5ad781c89dcf8a0823195fd04a23c026cfdcaa365c6522fd2311d0aaa505"
+      "sha256": "86cce38035d6931a5e5564022d1741ed6111a4b2b815cee1e4b7c81dfe950aa3"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_metadata_busy_motion_119.h",
@@ -53851,7 +53920,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_movement.c",
-      "sha256": "e560887ab5078796eca16619282a27d75eee3d644f9c78417fff1c872ac73693"
+      "sha256": "0931bed779f66f47338ef62a96d0e38e622e34a9c1f76f1f10723d881f2a709d"
     },
     {
       "path": "games/warcraft-3/game/tests/t_repulsion_crowds.c",
@@ -54095,7 +54164,7 @@
     },
     {
       "path": "tests/test_wc3_pathfinding_corpus.py",
-      "sha256": "36b575605354b36a051c0fccc4ead1e80441edb8e8b3a7da34daa7ec82359679"
+      "sha256": "607f35a135c4b6c70be5f95d96b4fcbef7774d4b731e1744d7aa8a65e7416b44"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-group-speed.md",
@@ -54107,11 +54176,11 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-engine.md",
-      "sha256": "0b59fdc6c59971e43faed72a0c6f4e3295025db30c60538d02305cdc356556f5"
+      "sha256": "9545e5dc59ac8f567eecdba2a23d5d3a9a5fc0f0776db96247fa26b085c3d7af"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-todo.md",
-      "sha256": "639c29a34302ea5f0de5d86829657399c0a37a789fce8f4a015b7de843e2fae5"
+      "sha256": "73789ebd6d6d55d30e18abdabd6bec9d99720b589a9e4d39fdc9c076604c085a"
     },
     {
       "path": "games/warcraft-3/game/g_timer.c",
@@ -58100,6 +58169,30 @@
     {
       "path": "tests/test_wc3_pathfinding_availability260.py",
       "sha256": "0c15a1c25d0c02698c53d7bdbd07b81ca407773b6903e656ae716320455d36dc"
+    },
+    {
+      "path": "tools/ghidra/research/Clock261Evidence.java",
+      "sha256": "d21b2b3bb0cdccfdd9ca2266040b9463c9aacb5d93e751949a1e13cb42ed506d"
+    },
+    {
+      "path": "tools/ghidra/research/verify_sched261_boundary.py",
+      "sha256": "d7d379988bf1f80bbaa2ffdbdb49c4ef68ca7bde7ea3e49e384e8c4c86e8b343"
+    },
+    {
+      "path": "tools/ghidra/verify_wc3_pathing_boundary261.py",
+      "sha256": "abbb5eed90da758bc601b0bc32e87cbfc4d15a288fe8731a9795c3a3b3d9ef04"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-boundary261-1.27.json",
+      "sha256": "3b36ce5b3bf5d9826293606b533de7a6f46c7f9be6b681d403a3deee0290221f"
+    },
+    {
+      "path": "games/warcraft-3/game/tests/fixtures/retail_boundary261.h",
+      "sha256": "bb4f57c61e26e6b0d837086719f978106b66420f492b7927e873c45145582aa0"
+    },
+    {
+      "path": "tests/test_wc3_pathfinding_boundary261.py",
+      "sha256": "6d419d74b09804000baf23111ecd38eb053f9dba0fa635ddd251fb2c984ab179"
     }
   ]
 }

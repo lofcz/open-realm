@@ -16189,3 +16189,64 @@ starts before the ranking decision; a rejected replacement does not undo it.
 
 Evidence archive:
 `/GitHub/wc3-analysis/reports/pathfinding-1.27/research/GROUP-03.2/payoff260/`.
+
+## Clock rollover preserves path admission state (Payoff261)
+
+SCHED-01.2 is closed by composing the existing public clock witnesses with a
+new original-code/engine boundary regression. The current production behavior
+already matches: this chunk adds acceptance coverage and does not claim a new
+runtime fix or change any previous retail expected fixture.
+
+Three independent time domains must remain separate:
+
+| State | Transition at the primary 300-second boundary |
+|---|---|
+| Request clock/time/epoch | Drain at the old span, subtract the span from surviving raw deadlines, increment epoch, drain the remainder. |
+| Mover committed clock | Retain the old epoch until the next commit; elapsed subtracts fractional times, clears the small fractional dead zone, then adds the signed epoch span. |
+| Path owner visits/FIFOs | Keep visit counter, retry timestamps, work, countdown and ordered queue links. Only an actual owner visit updates budgets. |
+
+`verify_sched261_boundary.py` executes unmodified 054190/0521f0/15cea0,
+167310/167fa0/168910/168310 and original scalar integration operations. 80
+advances from the labelled supplied time 299.875 cross the epoch on advance 26.
+Thirteen supplied owner visits test three requesters in order 2,0,1 against all
+four policies, with supplied charged search work. The emitted C fixture comes
+from these original instructions; the engine does not generate its expectations.
+The test drives production Move pose commits, admission, charging and owner
+begin callbacks. A save after advance 24 retains pending fine and coarse FIFOs;
+loading it after the completed run reproduces all 56 following advances, queue
+identities, decisions, retry timestamps and pose words. The first test draft's
+manual pending-count assertion was wrong (2 rather than the native fixture's 1);
+that draft is rejected. Neither the native fixture nor any old retail fixture
+was changed to accommodate an engine result.
+
+These supplied boundary inputs are not a public wrap capture. The unchanged
+Payoff117 read-only repeats each retain 320 actual getter-driven Move commits
+through a natural 300-second wrap and 13,692 public getters. Its production
+RunFrame regression still matches every native pose and all getter words;
+five saves reproduce 1,113 continuation commits, including backward restoration
+from epoch 1 to epoch 0. The unchanged Payoff181 wrap/UI-load controls additionally
+verify 9,405 request pops, exact rebasing/absolute restored deadlines and 465
+identical post-load continuation rows. UI load is the demonstrated reachable
+backward transition. No negative-increment gameplay producer is inferred.
+
+The dedicated verifier reexecutes the controlled native composition twice,
+revalidates both complete 117 archives and the 181 observed/unhooked controls,
+checks 339 original instructions exported from eight saved Ghidra functions,
+and runs all three engine regressions in Classic/TFT. Each edition passes
+344,585 assertions; the new boundary test contributes 1,679. Eight Python
+rejection tests cover altered clocks, FIFO counts, incomplete timelines,
+instruction/source provenance and missing engine continuation checks.
+
+Run from the repository root:
+
+```
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_boundary261.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/clock-boundary261-new.json
+```
+
+Evidence and rejected draft/build logs are retained in
+`/GitHub/wc3-analysis/reports/pathfinding-1.27/research/SCHED-01.2/payoff261/`.
+Pause/scaling/selector producers remain SCHED-01.1. Complete cross-feature
+movement domains and final replacement acceptance retain their existing tasks;
+this closure does not claim a natural crowded-wrap recording or new live run.

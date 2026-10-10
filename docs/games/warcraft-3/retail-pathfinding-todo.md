@@ -55,7 +55,13 @@ because they did not establish an overall performance win. This performance
 work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
-**283 done / 336 tasks; 53 remaining.**
+**284 done / 336 tasks; 52 remaining.**
+Payoff261 closes SCHED-01.2: exact clock rollover, backward UI-load continuation
+and independent path FIFO timing are verified through existing public retail
+captures plus a new original-code/production saved-suffix regression. Existing
+runtime behavior and valid expectations are retained; no new runtime fix is
+claimed. See [clock rollover](retail-pathfinding-engine.md#clock-rollover-preserves-path-admission-state-payoff261).
+
 Payoff260 integrates the owner-change target-availability producer: ordered
 nearby Attack acquisition, committed-range admission and speed-cap exemption
 preserve explicit Move and public heads. Two original repeats, an unhooked
@@ -1449,7 +1455,7 @@ Evidence: [movement evidence][M] and [routes][R]. Tools/artifacts: scheduler, mo
 ### SCHED-01 — Clock domains
 
 - [ ] **SCHED-01.1** Trace both clock selectors and configured spans to simulation time; assert pause, scaling and ordinary advancement against a fixed event timeline.
-- [ ] **SCHED-01.2** Cross clock rollover and a reachable backward-time transition; assert request deadlines, integration and admission behavior.
+- [x] **SCHED-01.2** Cross clock rollover and a reachable backward-time transition; assert request deadlines, integration and admission behavior. Payoff261: natural public getter-driven movement crosses300s with exact poses; UI load restores absolute requests and backward movement/save suffixes. A new original-code composition and production save regression preserve all four FIFO policies, retry timestamps and elapsed words across rollover. Existing behavior was correct; no old expectations changed. [Evidence](retail-pathfinding-engine.md#clock-rollover-preserves-path-admission-state-payoff261).
 
 ### SCHED-02 — Owner pass ordering
 
