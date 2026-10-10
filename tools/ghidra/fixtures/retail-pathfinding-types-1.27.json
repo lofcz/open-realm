@@ -18069,6 +18069,83 @@
           "storage": 4
         }
       ]
+    },
+    {
+      "address": "6f49d680",
+      "name": "Attack_GetAcquisitionPriority",
+      "returns": "u64",
+      "convention": "__thiscall",
+      "evidence": "Payoff264: complete instruction/RET and explicit x86 operand storage; repeated native priority and committed-distance captures. See Ranking264Evidence.java.",
+      "parameters": [
+        {
+          "name": "attack",
+          "type": "ptr:WC3AttackRangePrefix",
+          "storage": "ECX"
+        },
+        {
+          "name": "candidate",
+          "type": "ptr:WC3UnitOrdersPrefix",
+          "storage": 4
+        },
+        {
+          "name": "lower_bound",
+          "type": "u64",
+          "storage": 8
+        }
+      ]
+    },
+    {
+      "address": "6f49e3a0",
+      "name": "Attack_ShouldReplaceAcquiredTarget",
+      "returns": "u32",
+      "convention": "__thiscall",
+      "evidence": "Payoff264: complete instruction/RET and explicit x86 operand storage; repeated native priority and committed-distance captures. See Ranking264Evidence.java.",
+      "parameters": [
+        {
+          "name": "attack",
+          "type": "ptr:WC3AttackRangePrefix",
+          "storage": "ECX"
+        },
+        {
+          "name": "candidate",
+          "type": "ptr:WC3UnitOrdersPrefix",
+          "storage": 4
+        }
+      ]
+    },
+    {
+      "address": "6f05b1c0",
+      "name": "MoveBridge_GetCommittedPointDistanceSquared",
+      "returns": "ptr:WC3PathScalar",
+      "convention": "__thiscall",
+      "evidence": "Payoff264: complete instruction/RET and explicit x86 operand storage; repeated native priority and committed-distance captures. See Ranking264Evidence.java.",
+      "parameters": [
+        {
+          "name": "bridge",
+          "type": "ptr:WC3UnitMoverBridge",
+          "storage": "ECX"
+        },
+        {
+          "name": "output",
+          "type": "ptr:WC3PathScalar",
+          "storage": 4
+        },
+        {
+          "name": "world_x",
+          "type": "ptr:WC3PathScalar",
+          "storage": 8
+        },
+        {
+          "name": "world_y",
+          "type": "ptr:WC3PathScalar",
+          "storage": 12
+        },
+        {
+          "name": "prediction",
+          "type": "u32",
+          "storage": 16
+        }
+      ]
     }
   ],
   "globals": [

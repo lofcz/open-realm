@@ -1938,6 +1938,22 @@ bool S_UnitTargetInCommittedMoveRange(edict_t const *self,edict_t const *target,
     return move_target_in_range(self,target,range,false);
 }
 
+/*49e3a0 ->058900 then05b1c0(selector0): predict the observer to WORLD,
+ * project that result back to fine, and compare with the target's stored pose.
+ * Keep this roundtrip: nonzero origins can change a low fine bit. */
+float S_UnitCommittedTargetDistanceSquared(edict_t const *self,edict_t const *target) {
+    wc3GridPose_t source,point;
+    unit_predicted_pose(self,&source);unit_grid_pose(target,&point);
+    float squared=0;
+    FOR_LOOP(k,2) {
+        uint32_t word=wc3_float_bits(wc3_sub(source.world[k],point.origin[k]));
+        float fine=wc3_float((word^(word-0x03000000u))&0x80000000u ? 0 : word-0x02800000u);
+        float delta=wc3_sub(point.grid[k],fine);
+        squared=wc3_add(squared,wc3_mul(delta,delta));
+    }
+    return squared;
+}
+
 /* Original05b440 predicts the source, adds only its collision radius and
  * tests squared fine distance. Root uses zero authored extra range. */
 bool S_UnitPointInMoveRange(edict_t const *self,vec2_t const *point,float range) {

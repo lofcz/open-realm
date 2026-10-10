@@ -140,6 +140,7 @@ public class MapPathfindingTypes extends GhidraScript {
         types.put("u8", UnsignedCharDataType.dataType);
         types.put("u16", UnsignedShortDataType.dataType);
         types.put("u32", UnsignedIntegerDataType.dataType);
+        types.put("u64", UnsignedLongLongDataType.dataType);
         types.put("i32", IntegerDataType.dataType);
         types.put("f32", FloatDataType.dataType);
         types.put("WC3PathScalar", new TypedefDataType(CATEGORY, "WC3PathScalar", UnsignedIntegerDataType.dataType));

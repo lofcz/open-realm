@@ -4,12 +4,14 @@
 
 edict_t *alloc_test_unit(uint32_t class_id, float x, float y);
 void setup_test_world(void);
+void CM_SetupTestWorldBounds(box2_t const *);
 bool run_test_jass(cstring_t src);
 void order_attack(edict_t *self, edict_t *target);
 void T_Damage(edict_t *target, edict_t *attacker, int damage);
 void SV_Physics_Toss(edict_t *ent);
 void unit_build(edict_t *self, uint32_t class_id);
 void attack_melee_cooldown(edict_t *self);
+uint64_t G_TestAttackTargetPriority(edict_t const *,edict_t const *);
 void ai_train_build(edict_t *self);
 static slkTestData_t *building_install_repair_data(slkTestData_t **rows_out);
 static void building_restore_repair_data(slkTestData_t *old, slkTestData_t *rows);
@@ -277,6 +279,91 @@ TEST(wc3_order_lifecycle, subscription262_explicit_attack_defers_availability_un
         T_EQ(unit->current_order_id,head);
         if(enabled)T_EQ(unit->attack_target,candidate);
         else T_EQ(unit->attack_target,old);
+    }
+    reset_entities();setup_test_world();
+}
+
+/* Original49d680/49e3a0: weapon relevance precedes range, retained in-range
+ * targets precede distance, and equal ranks replace only for strict proximity. */
+TEST(wc3_order_lifecycle, ranking264_available_target_competes_with_retained_combat) {
+    FOR_LOOP(mode,8) {
+        reset_entities();setup_test_world();
+        level.timer_clock_valid=false;level.pathing_clock=(wc3Clock_t){8,0,300};
+        level.show_map_cheat=true; /* Original probe disables fog and mask. */
+        float oldx=588,newx=128;
+        if(mode==1){oldx=128;newx=96;}
+        if(mode==2)newx=388;
+        if(mode==3){oldx=388;newx=588;}
+        if(mode==4)newx=oldx;
+        edict_t *unit=review_order_unit(0,0),*old=review_order_unit(oldx,1),*candidate=review_order_unit(newx,0);
+        unit->s.model=old->s.model=candidate->s.model=1;
+        unit->collision=old->collision=candidate->collision=31;
+        unit->invulnerable=true;unit->runtime.acquisition_range=700;
+        unit->defense_type=old->defense_type=candidate->defense_type=2;
+        S_AttackProfileWrite(unit,0)->range=90;
+        if(mode==5)T_ASSERT(G_ActorRemoveSkill(candidate,MAKEFOURCC('A','a','t','k')));
+        if(mode==6)T_ASSERT(G_ActorRemoveSkill(candidate,MAKEFOURCC('A','m','o','v')));
+        G_PublishMoveSpatialObject(unit);G_PublishMoveSpatialObject(old);G_PublishMoveSpatialObject(candidate);
+        T_ASSERT(G_IssueUnitPointOrder(unit,"attack",&(vec2_t){1500,0},false,0,0));
+        order_attack(unit,old);T_EQ(unit->attack_target,old);
+        T_ASSERT(!unit->attack_acquisition_suppressed);
+        if(mode==7) {
+            uint32_t u=unit->s.number,o=old->s.number,c=candidate->s.number;
+            UnitWeapons_t const *weapons=unit->data.UnitWeapons;
+            cstring_t file=Test_TempPath("wc3-ranking264.bin");
+            T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+            unit=g_edicts+u;old=g_edicts+o;candidate=g_edicts+c;
+            /* This synthetic archive has no UnitWeapons.slk. Rebind the same
+             * authored fixture row; runtime weapon overrides came from save. */
+            unit->data.UnitWeapons=old->data.UnitWeapons=candidate->data.UnitWeapons=weapons;
+        }
+        uint64_t incoming=G_TestAttackTargetPriority(unit,candidate),retained=G_TestAttackTargetPriority(unit,old);
+        T_EQ(incoming>>32,mode==5 ? 0x0ba00000u : 0x0be00000u);
+        T_EQ((uint32_t)incoming,mode==2 || mode==3 || mode==4 ? 0x60000000u : mode==6 ? 0x44000000u : 0x64000000u);
+        T_EQ(retained>>32,0x0be00000u);
+        T_EQ((uint32_t)retained,mode==1 ? 0x65000000u : 0x60000000u);
+        uint32_t head=unit->current_order_id;
+        edict_t *waypoint=unit->movement.attackmove_waypoint;
+        wc3Random_t random=level.pathing_random;
+        G_SetUnitPlayer(candidate,1);
+        bool replace=mode==0 || mode==2 || mode==7;
+        T_EQ(unit->attack_target,replace ? candidate : old);
+        T_EQ(unit->goalentity,replace ? candidate : old);
+        T_EQ(unit->current_order_id,head);
+        T_EQ(unit->movement.attackmove_waypoint,waypoint);
+        T_ASSERT(unit->attack_speed_cap.active);
+        T_EQ(level.pathing_random.sum,random.sum);T_EQ(level.pathing_random.index,random.index);
+    }
+    reset_entities();setup_test_world();
+}
+
+#include "fixtures/retail_ranking264_distance.h"
+TEST(wc3_order_lifecycle, ranking264_ties_predict_observer_world_and_keep_target_committed) {
+    reset_entities();setup_test_world();
+    edict_t *unit=review_order_unit(0,0),*target=review_order_unit(0,1);
+    FOR_LOOP(i,sizeof(ranking264_distances)/sizeof(*ranking264_distances)) {
+        typeof(*ranking264_distances) *row=ranking264_distances+i;
+        vec2_t origin={wc3_float(row->origin[0]),wc3_float(row->origin[1])};
+        CM_SetupTestWorldBounds(&(box2_t){.min=origin,.max={origin.x+4096,origin.y+4096}});
+        edict_t *units[]={unit,target};
+        FOR_LOOP(j,2) {
+            edict_t *e=units[j];uint32_t const *fine=j ? row->target : row->source;
+            e->movement.fine_pose=(vec2_t){wc3_float(fine[0]),wc3_float(fine[1])};
+            e->s.origin2=(vec2_t){wc3_world_coordinate(e->movement.fine_pose.x,origin.x,32),
+                                  wc3_world_coordinate(e->movement.fine_pose.y,origin.y,32)};
+            e->movement.pose_world=e->s.origin2;e->movement.pose_valid=true;
+            e->movement.velocity=j ? (vec2_t){32000,-31968} :
+                (vec2_t){wc3_mul(wc3_float(row->velocity[0]),32),wc3_mul(wc3_float(row->velocity[1]),32)};
+            e->movement.clock_valid=true;e->movement.pose_clock=(wc3Clock_t){wc3_float(row->old),0,8};
+        }
+        level.pathing_clock=(wc3Clock_t){wc3_float(row->now),row->epoch,8};
+        vec2_t position=unit->s.origin2,fine=target->movement.fine_pose;
+        wc3Clock_t clock=unit->movement.pose_clock;wc3Random_t random=level.pathing_random;
+        T_EQ(wc3_float_bits(S_UnitCommittedTargetDistanceSquared(unit,target)),row->distance);
+        T_ASSERT(!memcmp(&unit->s.origin2,&position,sizeof(position)));
+        T_ASSERT(!memcmp(&target->movement.fine_pose,&fine,sizeof(fine)));
+        T_ASSERT(!memcmp(&unit->movement.pose_clock,&clock,sizeof(clock)));
+        T_ASSERT(!memcmp(&level.pathing_random,&random,sizeof(random)));
     }
     reset_entities();setup_test_world();
 }

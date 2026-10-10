@@ -16398,3 +16398,87 @@ The exact staged inventory also passed all **499 entries** and the **37 corpus
 integrity tests**. All498 prior corpus entries remain structurally identical;
 existing numeric/capture fixtures are unchanged. The inventory oracle count
 changes from217 to218 solely because this new executable contract was added.
+
+## Ordinary acquisition compares priorities and committed distances (Payoff264)
+
+An owner-change availability notification used to leave every existing automatic
+attack target in place. The ordinary player branch now compares the incoming and
+retained target using original49d680's unsigned packed priority. A stronger
+candidate replaces the combat target while retaining the public Attack Move
+head and waypoint. An equal priority replaces only at a strictly shorter
+distance; equal distance retains the old target. Availability still begins the
+speed-cap exemption before ranking, including when the candidate loses.
+
+The priority separates enabled weapons from an executing attack. Authored Move,
+flight, fortified armor, enabled Attack, the victim's directional relationship,
+worker counterattack exclusion, neutral level, committed weapon reach and
+retained-in-reach status supply the ordinary packed fields. These native fields
+are named in `wc3_attack_priority.h`; they are ordering bits rather than tuning
+weights. Owner-specific ability state remains in its existing systems. The
+handler examines only the incoming and retained targets and allocates nothing;
+it adds no entity or neighborhood scan.
+
+Original49e3a0 first queries the observer's predicted WORLD position through
+058900, then compares each candidate's stored fine position through05b1c0 with
+prediction selector0. Preserve the world roundtrip and the target-minus-observer
+software subtraction. Reversing the subtraction can change a low bit after
+squaring. Nonzero and large map origins can also change the projected point.
+The query changes neither mover's committed pose/clock nor the shared RNG.
+
+Eight public scenarios cover closer in-range acquisition, retained-in-range
+stickiness, shorter/farther equal-priority candidates, an existing ally threat,
+worker classification, removed Attack and removed Move. Each has two read-only
+original native repeats and an observer-free control: 24 captures, 120 public
+markers and 18 original replacement decisions. The repeated semantic stream
+keeps native flags, identities, keys, pruning bounds and scalar distance words;
+only process addresses are excluded from repeat comparison. All raw addresses
+remain in the compressed capture bundle.
+
+The independent numerical oracle executes unmodified058900 then05b1c0 for16
+fractional/negative/nonzero/large-origin and clock-epoch cases. It asserts that
+both supplied identities resolve before evaluating the distances and that both
+movers remain unchanged. An initial harness declared a one-slot registry for
+two movers; the failed lookup produced invalid expected rows. Those rows are
+retained only as diagnostics, and the new uncommitted fixture was regenerated
+from corrected original execution. No previously committed retail numeric or
+capture expectation changed.
+
+Production regressions check actual owner-change delivery, target replacement,
+public head/waypoint, exemption, RNG and saved restoration, plus all16 exact
+distance words and nonmutation. The synthetic test archive has no weapon table,
+so the save regression rebinds its original authored weapon row after loading;
+saved mutable attack overrides and order state still come from the save.
+
+The retained-target policy for TownAI and enabled artillery/line-artillery owners
+is unchanged: their separate native priority branches remain unported. Optional
+ability188/18c overrides, Attack8000 without a resolved victim, present target
+perimeters and rejected-candidate alternative78/7c ownership are also outside
+this chunk. GROUP-03.2 remains open; this is a concrete integration of its
+ordinary acquisition branch, not closure of the wider task.
+
+`Ranking264Evidence.java` saves five function annotations and three explicit x86
+prototypes, including the EDX:EAX64-bit return. Saved readback confirms the new
+prototypes and storage. A full type-schema application refused an independently
+extended existing mover type; it was not forced over that peer evidence.
+
+Reproduce with a fresh output path:
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_ranking264.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/ranking264-fresh.json
+```
+
+The archive is
+`/GitHub/wc3-analysis/reports/pathfinding-1.27/research/GROUP-03.2/payoff264/`.
+It retains the failing-first production run, drafts and invalid-registry
+diagnostic separately from accepted repeated captures, maps and original oracle.
+The strict verifier passes74 tests /18,282 assertions in each Classic/TFT mode,
+all24 captures,120 markers,18 native comparisons,16 original distance cases and
+1,013 instruction pins. The17 evidence rejection checks and37 corpus checks
+pass on the exact staged snapshot. All499 prior corpus entries remain identical;
+the new contract brings the inventory to219 oracles /500 entries. The shared
+map builder is the committed version: all eight captured maps were reproduced
+byte-identically with it, excluding unrelated concurrent Patrol edits.
+Full validation follows the authorized twelve-chunk cadence:2/12 after
+Payoff262. This chunk adds no save/network field and makes no frame-rate claim.

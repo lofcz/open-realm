@@ -18,6 +18,7 @@
 #include "jass/jass.h"
 #include "games/warcraft-3/common/wc3_pathing_speed.h"
 #include "games/warcraft-3/common/wc3_pathing_coordinates.h"
+#include "games/warcraft-3/common/wc3_attack_priority.h"
 
 void attack_walk(edict_t *ent);
 void attack_melee(edict_t *ent);
@@ -1720,6 +1721,76 @@ static void ai_attackmove_walk(edict_t *ent) {
 
 static umove_t attackmove_move_walk = { "walk", ai_attackmove_walk, NULL, CAbilityAttack };
 
+/*49d680's ordinary player priority is independent of encounter order. Query
+ * just the incoming and retained targets; do not rescan the neighborhood. */
+static bool attack_priority_worker(edict_t const *unit) {
+    cstring_t list=unit->data.UnitBalance ? unit->data.UnitBalance->type : NULL;
+    if(!list || !*list)list=unit->data.UnitData ? unit->data.UnitData->unitClassification : NULL;
+    if(list) {
+        PARSE_LIST(list,item,parse_segment)if(!strcasecmp(item,"peon"))return true;
+    }
+    return false;
+}
+
+static uint64_t attack_target_priority(edict_t const *unit,edict_t const *target) {
+    if(!target || !target->inuse || G_IsDeferredFree(target) || target->invulnerable ||
+       !S_AttackCanTarget(unit,target))return 0;
+    bool armed=G_ActorHasAbilityCode(target,MAKEFOURCC('A','a','t','k')) &&
+        attack_mask_has_weapon(target,attack_order_mask(target)) && !target->paused &&
+        !S_UnitIsCycloned(target) && !S_UnitIsEntanglingRooted(target) &&
+        S_HumanCanAttack(target) && S_CargoAttacksEnabled(target);
+    edict_t const *victim=armed ? target->attack_target : NULL;
+    if(victim && (!victim->inuse || G_IsDeferredFree(victim) ||
+       victim->spawn_time!=target->attack_target_spawn_time))victim=NULL;
+    wc3AttackTargetRelation_t relation=WC3_ATTACK_TARGET_IDLE;
+    if(victim==unit)relation=WC3_ATTACK_TARGET_SELF;
+    else if(victim) {
+        if(G_PlayerTreatsPlayerAsAlly(unit->s.player,victim->s.player))relation=WC3_ATTACK_TARGET_ALLY;
+        else relation=S_SpellIsEnemy((edict_t *)unit,(edict_t *)victim) ? WC3_ATTACK_TARGET_ENEMY : WC3_ATTACK_TARGET_NEUTRAL;
+    }
+    uint32_t level=G_UnitIsHero(target) ? target->hero.level : MAX(0,G_CorpseUnitLevel(target));
+    unitAttack_t const *weapon=attack_profile(unit,target);
+    float range=MAX(ATTACK_MINIMUM_CHASE_RANGE,MIN(weapon->range,unit->runtime.acquisition_range));
+    wc3AttackPriority_t facts={
+        .mobile=G_ActorHasAbilityCode(target,MAKEFOURCC('A','m','o','v')) && S_UnitCanTranslate(target),
+        .both_flying=(unit->aiflags&AI_FLYING) && (target->aiflags&AI_FLYING),
+        .fortified=target->defense_type==3, /* Native Unit+e4 defType fort. */
+        .armed=armed,.relation=relation,
+        .counterattack=armed && !attack_priority_worker(target) && !unit->invulnerable && S_AttackCanTarget(target,unit),
+        .low_level_neutral=unit->s.player>=PLAYER_NEUTRAL_AGGRESSIVE && level<7,
+        .in_range=S_UnitTargetInCommittedMoveRange(unit,target,range),
+        .retained=target==unit->attack_target
+    };
+    return wc3_attack_priority(&facts);
+}
+
+#ifdef BZ_TESTS
+uint64_t G_TestAttackTargetPriority(edict_t const *unit,edict_t const *target) {
+    return attack_target_priority(unit,target);
+}
+#endif
+
+/*49e3a0: an equal priority needs strictly less squared distance. A source
+ * world query and two committed target queries belong to Move's scalar API. */
+static bool attack_should_replace_available_target(edict_t const *unit,edict_t const *target) {
+    edict_t const *old=unit->attack_target;
+    if(!old)return true;
+    if(old==target)return false;
+    /* TownAI and artillery-area priorities are separate native branches.
+     * Keep their previous retained-target policy until their owners are ported. */
+    if(unit->aiflags&AI_TOWN_OWNED)return false;
+    FOR_LOOP(slot,2) {
+        weaponType_t delivery=S_AttackProfileRead(unit,slot)->weapon;
+        if(S_UnitAttackSlotEnabled(unit,slot) &&
+           (delivery==WPN_ARTILLERY || delivery==WPN_MLINE))return false;
+    }
+    uint64_t incoming=attack_target_priority(unit,target);
+    if(!incoming)return false;
+    uint64_t retained=attack_target_priority(unit,old);
+    if(incoming!=retained)return incoming>retained;
+    return S_UnitCommittedTargetDistanceSquared(unit,target)<S_UnitCommittedTargetDistanceSquared(unit,old);
+}
+
 /* Original6510b0 broadcasts d01a5 through the widget index. Ordinary pose
  * publication does not produce this event. Keep the materialized list private
  * across callbacks, as for help notifications, and validate retained identities. */
@@ -1759,9 +1830,8 @@ static void attack_target_available(edict_t *target) {
         /*49e256 passes prediction selector0: stored centers, both radii. */
         if(!S_UnitTargetInCommittedMoveRange(unit,target,range))continue;
         attack_cap_begin(unit);
-        /* The exemption precedes target replacement. Retained combat keeps
-         * its target here; the wider49d680 ranking remains independently owned. */
-        if(!unit->attack_target)order_attack(unit,target);
+        /* Exemption also survives ranking rejection, as in49e130. */
+        if(attack_should_replace_available_target(unit,target))order_attack(unit,target);
     }
     query->next=attack_help_queries;attack_help_queries=query;
 }
