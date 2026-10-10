@@ -241,9 +241,10 @@ class TimerMutationTests(unittest.TestCase):
         f=json.loads((ROOT/'tools/ghidra/fixtures/retail-timer-mutation-118-static.json').read_text())
         schema=json.loads((ROOT/'tools/ghidra/fixtures/retail-pathfinding-types-1.27.json').read_text())
         mapping=(ROOT/'tools/ghidra/MapPathfinding.java').read_text()
+        mapped=set(re.findall(r'^\s*\{\s*"([0-9a-f]+)"\s*,\s*"([^"]+)"',mapping,re.M))
         self.assertTrue(f['passed']);self.assertFalse(f['unsaved']);self.assertEqual(len(f['functions']),9)
         for fun in f['functions']:
-            self.assertTrue(fun['decompiled']);self.assertIn('"'+fun['address']+'", "'+fun['name']+'"',mapping)
+            self.assertTrue(fun['decompiled']);self.assertIn((fun['address'],fun['name']),mapped)
         for layout in f['layouts']:
             declared=next(x for x in schema['layouts']if x['name']==layout['name'])
             self.assertEqual(layout['length'],declared['length'])

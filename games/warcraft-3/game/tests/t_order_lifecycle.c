@@ -242,6 +242,45 @@ TEST(wc3_order_lifecycle, available260_owner_transfer_acquires_without_waiting_f
     reset_entities();setup_test_world();
 }
 
+/* Explicit target ownership disables the native availability subscription.
+ * A pending command cannot change the executing owner's policy. */
+TEST(wc3_order_lifecycle, subscription262_explicit_attack_defers_availability_until_owner_release) {
+    FOR_LOOP(mode,10) {
+        reset_entities();setup_test_world();
+        level.timer_clock_valid=false;level.pathing_clock=(wc3Clock_t){8,0,300};
+        edict_t *unit=review_order_unit(0,0),*old=review_order_unit(300,1),*candidate=review_order_unit(100,0);
+        unit->s.model=old->s.model=candidate->s.model=1;
+        unit->collision=old->collision=candidate->collision=16;
+        G_PublishMoveSpatialObject(unit);G_PublishMoveSpatialObject(old);G_PublishMoveSpatialObject(candidate);
+        if(mode==2 || mode==6 || mode==9) {
+            T_ASSERT(G_IssueUnitPointOrder(unit,"attack",&(vec2_t){900,0},false,0,0));
+        } else if(mode!=3) {
+            T_ASSERT(G_IssueUnitTargetOrder(unit,mode==1 ? "attackonce" : "attack",old,false,0));
+        }
+        if(mode==4)T_ASSERT(unit_issueimmediateorder(unit,"stop"));
+        if(mode==5)T_ASSERT(G_IssueUnitPointOrder(unit,"move",&(vec2_t){900,0},true,0,0));
+        if(mode==6 || mode==9)T_ASSERT(G_IssueUnitTargetOrder(unit,"attack",old,true,0));
+        if(mode==7)T_ASSERT(!G_IssueUnitTargetOrder(unit,"attack",NULL,false,0));
+        if(mode==5 || mode==6 || mode==9)T_EQ(unit->order_queue.count,1);
+        if(mode==9)unit_stand(unit); /* Activate the queued target owner. */
+        if(mode==8) {
+            uint32_t u=unit->s.number,c=candidate->s.number,o=old->s.number;
+            cstring_t file=Test_TempPath("wc3-subscription262.bin");
+            T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+            unit=g_edicts+u;candidate=g_edicts+c;old=g_edicts+o;
+        }
+        uint32_t head=unit->current_order_id;
+        T_ASSERT(!unit->attack_speed_cap.active);
+        G_SetUnitPlayer(candidate,1);
+        bool enabled=mode==2 || mode==3 || mode==4 || mode==6;
+        T_EQ(unit->attack_speed_cap.active,enabled);
+        T_EQ(unit->current_order_id,head);
+        if(enabled)T_EQ(unit->attack_target,candidate);
+        else T_EQ(unit->attack_target,old);
+    }
+    reset_entities();setup_test_world();
+}
+
 TEST(wc3_order_lifecycle, swing199_explicit_weapons_publish_exemption_before_damage) {
     /* Explicit producers do not pass through automatic acquisition or an
      * attacked/ally-help notification. Chase alone must not release the cap. */

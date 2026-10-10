@@ -63,8 +63,15 @@ static cstring_t hero_audit_cvar(cstring_t name, cstring_t fallback) {
     return !strcmp(name, "wc3_hero_saveload_audit") ? "1" : fallback;
 }
 
+/* Full-suite shards must not replace one another's diagnostic save slot. */
+static void hero_audit_save_path(cstring_t name, string_t out, uint32_t size) {
+    strlcpy(out, Test_TempPath(name), size);
+}
+
 static void step_hero_audit(uint32_t frames) {
+    void (*old_save_path)(cstring_t, string_t, uint32_t) = gi.SavePath;
     uint32_t i;
+    gi.SavePath = hero_audit_save_path;
     for (i = 0; i < frames; i++) {
         step_move_owner();
         G_RunEntities();
@@ -72,6 +79,7 @@ static void step_hero_audit(uint32_t frames) {
         G_HeroSaveLoadAuditFrame();
         level.time += FRAMETIME;
     }
+    gi.SavePath = old_save_path;
 }
 
 static void arm_hero_audit(cstring_t map) {

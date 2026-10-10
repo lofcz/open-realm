@@ -2495,7 +2495,9 @@ TEST(stress_net, every_unit_name_survives_map_start_over_lossy_modem) {
     /* Mirror G_UnitNameConfigstring: every name rewrites its packed slot, and the whole table fills at map start. */
     FOR_LOOP(i, CS_MAX_NAMES) {
         uint32_t const slot = i / ENT_NAMES_PER_CS, sub = i % ENT_NAMES_PER_CS;
-        snprintf(expected[i], sizeof(expected[i]), "Hero %03u of the Lordaeron Vanguard", (unsigned)i);
+        char name[64];
+        snprintf(name, sizeof(name), "Hero %03u of the Lordaeron Vanguard", (unsigned)i);
+        strlcpy(expected[i], name, sizeof(expected[i]));
         entity_name_pool_prepare(pool, sub ? sv.configstrings[CS_GENERAL + slot] : NULL);
         entity_name_slot_store(pool, sub, expected[i]);
         SV_SetConfigString(CS_GENERAL + slot, pool, sizeof(pool));

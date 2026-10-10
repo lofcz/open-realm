@@ -2187,6 +2187,7 @@ struct edict_s {
     edict_t *attack_target; /* Attack owns its target independently of Move/FIFO parents. */
     uint64_t attack_target_sequence;
     uint32_t attack_target_spawn_time; /* active CAbilityAttack target incarnation */
+    uint32_t attack_acquisition_suppressed; /* Explicit target owner clears retail Attack20.4000. */
     edict_t *item_drop; /* inventory item owned by an active point-drop behavior */
     edict_t *spell_item; /* originating item for a pending walk-into-range spell */
     uint32_t spell_item_spawn_time;

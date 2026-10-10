@@ -1412,6 +1412,7 @@ bool S_OrderAttack(edict_t *self, edict_t *target) {
     S_SetFollowTarget(self,NULL);
     self->movement.holding_position = false;
     order_attack(self, target);
+    self->attack_acquisition_suppressed = true;
     self->movement.explicit_allied_attack = G_PlayerTreatsPlayerAsAlly(self->s.player, target->s.player);
     return true;
 }
@@ -1744,8 +1745,9 @@ static void attack_target_available(edict_t *target) {
         float dx=wc3_sub(point.x,center.x),dy=wc3_sub(point.y,center.y);
         float reach=wc3_add(radius,wc3_div(MAX(1,unit->collision),32));
         if(wc3_add(wc3_mul(dx,dx),wc3_mul(dy,dy))>wc3_mul(reach,reach))continue;
-        /*49e130.4000: explicit Move and other active owners suppress Attack's
+        /*49e130.4000: explicit target Attack and other active owners suppress
          * acquisition. Attack Move retains its waypoint and public head. */
+        if(unit->attack_acquisition_suppressed)continue;
         if(unit->currentmove && unit->currentmove->proc!=CAbilityAttack &&
             unit->currentmove->think!=ai_stand)continue;
         if(S_UnitIsCycloned(unit) || !S_HumanCanAttack(unit) || !S_CargoAttacksEnabled(unit) ||
@@ -1768,6 +1770,7 @@ static void attack_target_available(edict_t *target) {
 void order_attackmove(edict_t *self, edict_t *waypoint) {
     if (S_GoldMineWorkerIsInside(self))
         return;
+    self->attack_acquisition_suppressed = false;
     S_SetMoveGoal(self, &self->movement.attackmove_waypoint, waypoint);
     S_SetMoveGoal(self, &self->movement.patrol_a, NULL);
     S_SetMoveGoal(self, &self->movement.patrol_b, NULL);
@@ -1836,6 +1839,7 @@ BZ_ABILITY_PROC(CAbilityAttack) {
             return ABILITY_ORDER_UNHANDLED;
         return S_OrderAttack(ent,call->issued_target_order.target) ? ABILITY_ORDER_ACCEPTED : ABILITY_ORDER_REJECTED;
     case A_UNIT_STAND:
+        if(ent)ent->attack_acquisition_suppressed=false;
         attack_guard_stand(ent);return false;
     case A_UNIT_OWNER_CHANGING:
         if(ent){attack_guard_cancel(ent);ent->attack_guard.initialized=false;}return false;
@@ -1916,6 +1920,7 @@ BZ_ABILITY_PROC(CAbilityAttack) {
         return false;
     case A_MOVE_LEAVE:
         if(ent && call && call->next_move_proc!=CAbilityAttack) {
+            ent->attack_acquisition_suppressed=false;
             S_EndUnitTargetChase(ent,CAbilityAttack);attack_set_target(ent,NULL);
         }
         return false;

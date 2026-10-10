@@ -1,5 +1,10 @@
 # Warcraft III Save/Load
 
+Save166 retains the accepted Attack target owner's availability suppression.
+Pending/rejected orders do not change it; loading does not derive it from public
+order IDs. Save165 and earlier layouts are rejected. See
+[Attack subscriptions](retail-pathfinding-engine.md#explicit-attack-owns-availability-suppression-payoff262).
+
 Save165 retains Attack-owned neutral guard anchors, captured range, poll/return
 phase and exact primary request deadline/serial. Loading rebuilds timer-heap
 membership without rearming. Save164 and earlier layouts are rejected; the

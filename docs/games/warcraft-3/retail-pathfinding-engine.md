@@ -16250,3 +16250,62 @@ Evidence and rejected draft/build logs are retained in
 Pause/scaling/selector producers remain SCHED-01.1. Complete cross-feature
 movement domains and final replacement acceptance retain their existing tasks;
 this closure does not claim a natural crowded-wrap recording or new live run.
+
+## Explicit Attack owns availability suppression (Payoff262)
+
+The target-availability integration incorrectly treated every active Attack move
+as an acquisition subscriber. Retail separates an explicit target task from
+idle and Attack Move acquisition. The explicit task clears Attack `+20.4000`,
+so the first instruction gate in `49e130` returns before range checks, target
+ranking or speed-cap exemption. Merely retaining the current target after
+unconditionally calling `attack_cap_begin` was observably wrong.
+
+`S_OrderAttack` now records suppression with the accepted target owner. Automatic
+`order_attack` preserves its caller's ownership. Attack Move, actual stand and
+leaving Attack release suppression; appending a Shift command and rejecting a
+replacement cannot change the executing owner's policy. The indexed availability
+query checks this state before acquisition. No public order number or issued-event
+history is used to infer the owner, and no new scan or timer is introduced.
+Save166 retains the state. Save165 and earlier layouts are rejected before map
+selection or entity mutation.
+
+Two complete read-only Frida repeats and one unhooked public control use the
+same three-unit map. The actor receives seven availability deliveries per run:
+explicit Attack at tick 2, Stop at tick 4, Attack Move at tick 6 and AttackOnce at
+tick 8. Its `4000` state is respectively clear/set/set/clear. Only ticks 4/6 start
+an availability exemption. Both repeats retain all 21 handler deliveries, target
+identities, actual range decisions and request clocks; all 30 public markers
+match the control. Cached Unit284/288 samples differ at tick 8 and remain in the
+raw bundle; they are not committed-pose expectations or silently normalized
+into an exact-trajectory claim. The initial four-lane exploration also exposed
+explicit-target suppression, but cross-lane automatic acquisitions made it an
+unsuitable replacement-ranking fixture; it is retained separately.
+
+The new production regression fails five assertions before the fix and passes
+all 59 after it. Ten cases cover explicit Attack/AttackOnce, idle/Attack Move,
+Stop release, pending Move/Attack, rejected replacement, queued activation and
+saved explicit ownership. Existing owner-transfer and all save regressions run
+alongside it in Classic/TFT. New evidence rejection tests check guard changes,
+missing delivery/repeat/completion, observer control and source provenance.
+Ghidra's saved `49e130` mapping links the public witnesses to its 194 original
+instructions. Previous retail expectations are unchanged.
+
+```
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_subscription262.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/subscription262-new.json
+```
+
+Full `49d680` replacement ranking and the remaining prevention, neutral and
+Captain domains stay within GROUP-03.2; no additional TODO is introduced or
+closed by this guard fix. Evidence, rejected drafts and the scheduled full-suite
+checkpoint are archived under
+`/GitHub/wc3-analysis/reports/pathfinding-1.27/research/GROUP-03.2/payoff262/`.
+
+The full-suite checkpoint exposed a separate test harness collision: parallel
+Hero-audit processes shared one diagnostic save slot. The same existing test
+passes in isolation. Its fixture now overrides SavePath with per-process
+temporary storage and restores the import after each audit sequence. Assertions
+and gameplay behavior remain unchanged. Two compile warnings were also removed
+by sizing a command-test expected path correctly and making the existing
+network-name truncation explicit; the name bytes and wire contract are identical.

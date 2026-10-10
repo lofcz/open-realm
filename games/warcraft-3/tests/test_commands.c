@@ -219,7 +219,8 @@ TEST(commands, command_registration) {
 }
 
 TEST(commands, save_path_adds_one_sav_extension) {
-    PATHSTR path, home, expected;
+    PATHSTR path, home;
+    char expected[sizeof(home) + 32];
 
     setup_command_tests();
     snprintf(home, sizeof(home), "%s", Test_TempPath("save-path-test"));
