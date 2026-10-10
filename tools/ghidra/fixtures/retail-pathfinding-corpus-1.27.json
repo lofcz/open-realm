@@ -18,7 +18,7 @@
     "archive": "Local report root containing the frozen JSONL inputs.",
     "engine": "Fresh compiled wc3_pathing_engine_probe.c library."
   },
-  "scope": "219 executable original/evidence contracts;500 total entries.",
+  "scope": "220 executable original/evidence contracts;501 total entries.",
   "entries": [
     {
       "id": "oracle-adaptive",
@@ -51646,6 +51646,62 @@
         "The synthetic engine archive has no UnitWeapons.slk; its original authored weapon row is rebound after ReadGame, while mutable attack overrides and command state come from save.",
         "Process addresses are preserved in raw captures and excluded only from repeated semantic projections. Original numeric/capture fixtures are unchanged."
       ]
+    },
+    {
+      "id": "oracle-bridge265",
+      "kind": "oracle",
+      "command": [
+        "{python}",
+        "tools/ghidra/verify_wc3_pathing_bridge265.py",
+        "--binary",
+        "{binary}",
+        "--report",
+        "{report}"
+      ],
+      "inputs": {
+        "binary_sha256": "d51e5680243fc90e19c9d6074f7fac433c466d3cf5f46e2364291725574d8236"
+      },
+      "report": "bridge265.json",
+      "expected_exit": 0,
+      "expected_status": "verified",
+      "checks": {
+        "passed": {
+          "equal": true
+        },
+        "original_cases": {
+          "equal": 132
+        },
+        "positive_cases": {
+          "equal": 66
+        },
+        "negative_cases": {
+          "equal": 66
+        },
+        "rejected": {
+          "equal": 120
+        },
+        "delivered": {
+          "equal": 12
+        },
+        "instructions": {
+          "equal": 227
+        },
+        "engine": {
+          "length": 2
+        }
+      },
+      "evidence": [
+        "S",
+        "O",
+        "C"
+      ],
+      "scope": "Complete original spatial bridge guard/reference matrix in both signed-slot domains plus production cancellation/scheduled-completion suppression for retired receivers.",
+      "exclusions": [
+        "Guard/identity inputs are supplied original-code states, not evidence that a public producer can fabricate a stale or invalid handle.",
+        "Original vtables/dispatcher/table pinning execute completely; callback reentry is covered by existing independent order-subscriber evidence and production regressions.",
+        "Engine stable edict slots and spawn generations replace native wrapper/refcount allocation. Both native slot-sign domains map to the same generation/lifetime contract; engine does not copy those representation bits.",
+        "Populated factory relations and child final-reference destruction remain ORDER-04.2. Existing retail expectations are unchanged."
+      ]
     }
   ],
   "fixtures": [
@@ -51711,7 +51767,7 @@
     },
     {
       "path": "tools/ghidra/fixtures/retail-pathfinding-types-1.27.json",
-      "sha256": "3201d8dea0c4f3beec2b1dcf86850d9c9d6cc993abe9a8008c96fe3176091b3f"
+      "sha256": "b7be70db9bbd9efb786f0df617e787eb89ba85cd7d6460aa4bd8057642865740"
     },
     {
       "path": "tools/ghidra/fixtures/retail-callback-mutations-1.27.json",
@@ -52544,7 +52600,7 @@
     },
     {
       "path": "tools/ghidra/MapPathfinding.java",
-      "sha256": "ff5bd6f0d01e63bc2a380e065a67f76e41637299f52dac0f5a099ca42c9431f8"
+      "sha256": "7c5448e4af19a0c993251f4ed986b1bb43e10ac8f2afb63effb6351b4711e459"
     },
     {
       "path": "games/warcraft-3/game/tests/retail_metadata_busy_motion_119.h",
@@ -53400,7 +53456,7 @@
     },
     {
       "path": "games/warcraft-3/game/skills/s_move.c",
-      "sha256": "8092f75177024717218c8209aa420083aa92be895114ed469d16eaf57338f370"
+      "sha256": "dfe9c559607bca665a977eda8e3d44dc58222660e641e6cbd9062ca384210398"
     },
     {
       "path": "tools/ghidra/verify_wc3_pathing_spatial_save.py",
@@ -54336,7 +54392,7 @@
     },
     {
       "path": "tests/test_wc3_pathfinding_corpus.py",
-      "sha256": "1cdea3236011d543a947b863428a36623a8860e4cfdc6045e0a1ede89824ad63"
+      "sha256": "7bc47493903bf8bed5115cad61656a9e4ea18c2f5f845faa8b813936a08c602f"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-group-speed.md",
@@ -54348,11 +54404,11 @@
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-engine.md",
-      "sha256": "80f64dc561661872bb8f777c23a2b4d04d805be8283691720c61f1b1df0b1f5e"
+      "sha256": "72df59d040ce04bf33df0d0babae5c899cf49fbd8d760825dfda800775fe3115"
     },
     {
       "path": "docs/games/warcraft-3/retail-pathfinding-todo.md",
-      "sha256": "d3dceb73cb6b070c3305e4c1b16769c29f475d3f792bcaa751bdfef381782481"
+      "sha256": "d859e0e27218fa0134f596e8849ed4a3a055b436de67e099775a1e67107a7849"
     },
     {
       "path": "games/warcraft-3/game/g_timer.c",
@@ -55436,7 +55492,7 @@
     },
     {
       "path": "games/warcraft-3/game/tests/t_order_lifecycle.c",
-      "sha256": "f0e26420f888f6bae03a390113ef5d5e6590c9872f12913c7e742d5058d4b0fd"
+      "sha256": "981b2db395253b410c2c979f19b0c395861d1a86f21aeedba5285f0495bc173d"
     },
     {
       "path": "games/warcraft-3/game/tests/t_patrol_orders.c",
@@ -58493,6 +58549,26 @@
     {
       "path": "tests/test_wc3_pathfinding_ranking264.py",
       "sha256": "319956f0f3f713ce8f8db1d3c9b0ba0f680bfbb54bf15f6d5eec483c34d17740"
+    },
+    {
+      "path": "tools/ghidra/research/bridge265_oracle.py",
+      "sha256": "bf0e3db287dc0cd301680211ca0d4600bf7ec059318e6b7ab07966b4727cb774"
+    },
+    {
+      "path": "tools/ghidra/research/Bridge265Evidence.java",
+      "sha256": "ebd52eb05f70d23bb74785099bc1002351432572831adde66cf8c23b85fc2a30"
+    },
+    {
+      "path": "tools/ghidra/verify_wc3_pathing_bridge265.py",
+      "sha256": "72bbe054015aefd5cc687a970a11a9750aa5b3d4816630e6359c1a298dfbc526"
+    },
+    {
+      "path": "tools/ghidra/fixtures/retail-bridge265-1.27.json",
+      "sha256": "57c09e6a609f8055ac2c65b15dbaef218729f772dcd648c545b2bbfb3045b391"
+    },
+    {
+      "path": "tests/test_wc3_pathfinding_bridge265.py",
+      "sha256": "23490a213c9fe8ed61905e060f11204dcd835777afe469227162cb3b435dea3c"
     }
   ]
 }

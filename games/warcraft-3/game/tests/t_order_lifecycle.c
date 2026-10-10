@@ -368,6 +368,40 @@ TEST(wc3_order_lifecycle, ranking264_ties_predict_observer_world_and_keep_target
     reset_entities();setup_test_world();
 }
 
+static unsigned bridge265_completions;
+static void bridge265_complete(edict_t *receiver,edict_t *unit,bool arrived) {
+    (void)receiver;(void)unit;(void)arrived;
+    bridge265_completions++;
+}
+
+TEST(wc3_order_lifecycle, bridge265_retired_receiver_cannot_receive_completion) {
+    FOR_LOOP(mode,6) {
+        reset_entities();setup_test_world();
+        edict_t *unit=review_order_unit(64,0),*target=review_order_unit(900,1);
+        edict_t *receiver=mode>=4 ? review_order_unit(128,0) : unit;
+        bridge265_completions=0;
+        T_ASSERT(S_BeginUnitTargetApproach(unit,target,32,receiver,bridge265_complete));
+        T_NOT_NULL(S_UnitTargetApproachReceiver(unit));
+        if(mode==1)unit->spawn_time++; /* Same storage, different identity. */
+        if(mode>=2)G_DeferFreeEdict(receiver);
+        if(mode==5) {
+            unsigned visits=0;
+            while(unit->movement.group_id && visits++<600) {
+                level.pathing_clock.time=wc3_add(level.pathing_clock.time,.03f);level.pathing_counter++;
+                level.scheduled_think=true;S_BeginAbilityOwnerUpdates();S_RunAbilityOwnerUpdates();level.scheduled_think=false;
+            }
+            T_ASSERT(visits<600);T_EQ(unit->movement.group_id,0);
+        } else if(mode<2 || mode==4)unit_stand(unit);
+        T_EQ(bridge265_completions,mode==0 ? 1u : 0u);
+        if(mode==3) {
+            G_DeferFreeEdict(unit);unit_stand(unit);
+            T_EQ(bridge265_completions,0);
+        }
+        T_NULL(S_UnitTargetApproachReceiver(unit));
+    }
+    reset_entities();setup_test_world();
+}
+
 TEST(wc3_order_lifecycle, swing199_explicit_weapons_publish_exemption_before_damage) {
     /* Explicit producers do not pass through automatic acquisition or an
      * attacked/ally-help notification. Chase alone must not release the cap. */

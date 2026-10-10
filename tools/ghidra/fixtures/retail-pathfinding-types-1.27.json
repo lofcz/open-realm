@@ -18146,6 +18146,49 @@
           "storage": 16
         }
       ]
+    },
+    {
+      "address": "6f056090",
+      "name": "Agent_TranslateSpatialMessage",
+      "returns": "void",
+      "convention": "__thiscall",
+      "evidence": "Payoff265: explicit native ECX/stack operands and RET4/8; complete original guard/reference matrix. See Bridge265Evidence.java.",
+      "parameters": [
+        {
+          "name": "receiver",
+          "type": "ptr:WC3UnitOrdersPrefix",
+          "storage": "ECX"
+        },
+        {
+          "name": "tag",
+          "type": "u32",
+          "storage": 4
+        },
+        {
+          "name": "packet",
+          "type": "ptr:void",
+          "storage": 8
+        }
+      ]
+    },
+    {
+      "address": "6f057590",
+      "name": "AgentPayload_ForwardSpatialMessage",
+      "returns": "void",
+      "convention": "__thiscall",
+      "evidence": "Payoff265: explicit native ECX/stack operands and RET4/8; complete original guard/reference matrix. See Bridge265Evidence.java.",
+      "parameters": [
+        {
+          "name": "wrapper",
+          "type": "ptr:WC3AgentWrapperPrefix",
+          "storage": "ECX"
+        },
+        {
+          "name": "packet",
+          "type": "ptr:void",
+          "storage": 4
+        }
+      ]
     }
   ],
   "globals": [

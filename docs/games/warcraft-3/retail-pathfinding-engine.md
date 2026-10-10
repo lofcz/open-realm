@@ -16482,3 +16482,72 @@ map builder is the committed version: all eight captured maps were reproduced
 byte-identically with it, excluding unrelated concurrent Patrol edits.
 Full validation follows the authorized twelve-chunk cadence:2/12 after
 Payoff262. This chunk adds no save/network field and makes no frame-rate claim.
+
+## Retired movement receivers reject completion callbacks (Payoff265)
+
+ORDER-04.3 now has a complete spatial-message guard matrix. The original chain
+is wrapper virtual20 ->057590 -> receiver virtual18 ->056090 ->055800/055820 ->
+CUnit virtual14 ->071dc0. The translator requires a present host with host8
+enabled, a resolved receiver identity, wrapper type2b61676c and wrapper20==0.
+The last guard is independent of identity validity: a pending-release wrapper
+still resolves but must receive no new movement notification.
+
+The engine's two physical-group callback paths checked the receiver's live slot
+and spawn generation, but omitted pending removal. `G_DeferFreeEdict` marks the
+receiver pending before retiring Move, so cancellation could deliver a failure
+callback into that already removed receiver. Both paths now also test
+`G_IsDeferredFree(receiver)`. Cancellation clears callback ownership before any
+delivery, preserving exactly-once behavior and callback reentry. Live receiver
+queries retain their existing identity visibility during deferred removal.
+
+The failing-first production regression reproduces three bad assertions before
+the fix. Its final six scenarios cover ordinary cancellation, changed generation,
+same-owner removal, duplicate removal and an independently retired external
+receiver. The external case also runs the actual physical scheduler through
+terminal movement; it verifies that suppressing the callback still releases
+the physical group. The new regression passes27 assertions. Existing authored
+spell approach, unreachable-spell, interruption, callback-reentry and save-version
+checks remain active in the focused verifier.
+
+`bridge265_oracle.py` runs132 complete unmodified057590 calls using original
+wrapper/CUnit vtables and dispatcher code. Both positive and negative slot-sign
+domains have66 cases. The matrix crosses refcounts1/3, arrival63702661 and both
+blocked tags6370266f/70, and11 states: valid, absent/disabled host, stale generation,
+free slot, out-of-bound slot, wrong wrapper type, pending release, absent payload,
+unknown tag and invalid identity. Each identity resolution is asserted separately
+before delivery. All120 rejected cases dispatch nothing; all12 valid cases emit
+the proper40190065/66 event with the receiver as sender, execute a nonnull empty
+subscriber table, pin refs+1 and restore the exact prior count. Every supplied
+object, registry domain, bucket and packet is unchanged at return, and the SEH
+chain and stack balance. No game instruction or callback is replaced.
+
+These invalid guard inputs are explicitly supplied original-code states. They
+do not establish that public gameplay can fabricate invalid handles. Earlier
+[public subscriber/removal evidence](#nested-orders-retain-their-packet-and-removal-suspends-execution-payoff178)
+and [completion bridge evidence](retail-pathfinding-movement.md#completion-bridge-into-cunit-events)
+retain their existing expectations. No new Frida witness is claimed by this
+matrix. Native sign-domain allocation/refcounts are representation details;
+the engine uses stable edict slots plus saved spawn generations and deferred
+lifetime. It preserves rejection/delivery rather than copying native handle bits.
+Populated relation/child factory destruction remains ORDER-04.2.
+
+Five Ghidra notes and two explicit x86 prototypes are saved. A second export
+after saving is byte-identical, including instructions, operand storage and
+xrefs. `MapPathfinding.java` and the type schema retain the same annotations.
+All prior retail fixtures and prior corpus entry contracts remain unchanged.
+
+Reproduce using a fresh output path:
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_bridge265.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/bridge265-fresh.json
+```
+
+Focused validation passes77 tests /20,786 assertions per Classic/TFT mode,
+all132 original cases and227 instruction pins. Ten evidence rejection checks
+and37 corpus integrity checks pass on the exact staged snapshot. Inventory:
+220 executable contracts /501 entries; all500 previous entries are structurally
+identical. No save/network layout or performance claim changes. Full validation
+remains on the authorized twelve-chunk cadence:3/12 after Payoff262. Archive:
+`/GitHub/wc3-analysis/reports/pathfinding-1.27/research/ORDER-04.3/payoff265/`.

@@ -728,7 +728,7 @@ static void move_complete_receiver(moveGroup_t *group, edict_t *unit, bool arriv
     edict_t *receiver=group->receiver;uint32_t spawn=group->receiver_spawn;
     void (*complete)(edict_t *,edict_t *,bool)=group->complete;
     group->receiver=NULL;group->receiver_spawn=0;group->complete=NULL;group->owner_ability=0;
-    if(receiver && receiver->inuse && receiver->spawn_time==spawn && complete)
+    if(receiver && receiver->inuse && receiver->spawn_time==spawn && !G_IsDeferredFree(receiver) && complete)
         complete(receiver,unit,arrived);
 }
 
@@ -5987,7 +5987,7 @@ static void move_group_complete_members(moveGroup_t *group, moveGroupMember_t **
                 group->receiver=NULL;group->receiver_spawn=0;group->complete=NULL;group->owner_ability=0;
                 move_detach_group(unit);unit->movement.group_id=0;
                 if(!ability_owned)S_SetFollowTarget(unit,NULL);
-                if(receiver->inuse && receiver->spawn_time==spawn && complete)
+                if(receiver->inuse && receiver->spawn_time==spawn && !G_IsDeferredFree(receiver) && complete)
                     complete(receiver,unit,arrived);
                 else unit_stand(unit);
                 continue;

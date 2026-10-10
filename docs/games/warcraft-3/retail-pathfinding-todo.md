@@ -55,7 +55,11 @@ because they did not establish an overall performance win. This performance
 work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
-**285 done / 336 tasks; 51 remaining.**
+**286 done / 336 tasks; 50 remaining.**
+
+Payoff265 closes ORDER-04.3: complete original bridge guards in both handle
+domains, balanced reference pins and a failing-first engine fix suppress
+completion callbacks to pending-release receivers. See [receiver lifetime](retail-pathfinding-engine.md#retired-movement-receivers-reject-completion-callbacks-payoff265).
 
 Payoff264 integrates ordinary target replacement: native packed priorities, strict
 committed-target distance ties, retained public Attack Move ownership and saved
@@ -1574,7 +1578,7 @@ Evidence: [order evidence][M]. Tools/artifacts: order_tasks, arrival, lifetime.
 
 - [x] **ORDER-04.1** Eight last-reference release cycles and six factory reuses pass. Evidence: [payload reclamation][reclamation]; preallocated pools and supplied registration, no populated relations/negative domain.
 - [ ] **ORDER-04.2** Construct and release an object with populated relations/children through the real factory; assert child/reference cleanup and free-list recovery.
-- [ ] **ORDER-04.3** Exercise bridge guard failure, stale identity and both handle domains; assert rejection and reference balance.
+- [x] **ORDER-04.3** Exercise bridge guard failure, stale identity and both handle domains; assert rejection and reference balance. Payoff265 verifies132 complete original calls, all host/identity/type/release guards, both signed-slot domains and balanced ref1/3 pins. Engine cancellation and scheduled completion now suppress pending-release receivers; ordinary/reuse/duplicate/external lifetimes pass. [Evidence](retail-pathfinding-engine.md#retired-movement-receivers-reject-completion-callbacks-payoff265).
 - [x] **ORDER-04.4** Grow an empty factory/pool through its allocator boundary; assert first construction and final payload/wrapper release. [Payoff192](retail-pathfinding-engine.md#cold-point-factories-and-empty-queue-storage-payoff192): cold original COrderPoint(58/1), CTaskPoint(50/64) and wrapper(bc/512) storage grows through513 simultaneous pairs per class,2052 final clock releases and allocation-free exact LIFO reuse. Supplied class/registry bindings are explicit. Two public129-unit Move bursts retain258 complete task lifetimes,270 markers and exact repeat/control streams. Engine reclaims empty queue buckets after cancellation/final dispatch; failing-first129-unit/stale-target/replacement tests and wrapped/empty save round-trips pass both schemas.
 
 ### ORDER-05 — Deferred requests
