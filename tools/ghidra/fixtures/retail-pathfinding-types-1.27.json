@@ -1019,6 +1019,24 @@
           "evidence": "2039d0/061320 reject nonzero\n2039d0/061320 reject nonzero\nORDER-05.1 (retired, ptr:WC3AgentRequest): Release request (15e0e0 idempotence guard); same field as WC3AgentWrapperPrefix.retired. ORDER-05.1: instruction-verified (disassembly in ORDER-05.1/asm, RET/stack below); Unicorn oracle verify_ORDER-05.1_request_heap.py (432 cases, 0 mismatches); live order05 requests probe (observer==control, repeat equal)."
         },
         {
+          "offset": 36,
+          "name": "receiver_previous",
+          "type": "ptr:void",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
+          "offset": 40,
+          "name": "receiver_next",
+          "type": "ptr:void",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
+          "offset": 48,
+          "name": "receiver_owner",
+          "type": "ptr:WC3AgentWrapperPrefix",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
           "offset": 68,
           "name": "period",
           "type": "WC3PathScalar",
@@ -5332,6 +5350,66 @@
           "name": "constructor_argument",
           "type": "u32",
           "evidence": "21e790/22e9c0;Payoff244"
+        }
+      ]
+    },
+    {
+      "name": "WC3AgentRelationList266",
+      "length": 16,
+      "fields": [
+        {
+          "offset": 0,
+          "name": "anchor",
+          "type": "ptr:void",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
+          "offset": 4,
+          "name": "head",
+          "type": "ptr:void",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        }
+      ]
+    },
+    {
+      "name": "WC3AgentRelations266",
+      "length": 184,
+      "fields": [
+        {
+          "offset": 0,
+          "name": "base",
+          "type": "WC3AgentWrapperPrefix",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
+          "offset": 88,
+          "name": "children",
+          "type": "WC3DynamicTablePrefix",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
+          "offset": 120,
+          "name": "relations0",
+          "type": "WC3AgentRelationList266",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
+          "offset": 136,
+          "name": "relations1",
+          "type": "WC3AgentRelationList266",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
+          "offset": 152,
+          "name": "relations2",
+          "type": "WC3AgentRelationList266",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
+        },
+        {
+          "offset": 168,
+          "name": "relations3",
+          "type": "WC3AgentRelationList266",
+          "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py."
         }
       ]
     }
@@ -18187,6 +18265,130 @@
           "name": "packet",
           "type": "ptr:void",
           "storage": 4
+        }
+      ]
+    },
+    {
+      "address": "6f145c70",
+      "name": "AgentWrapper_Destroy",
+      "returns": "void",
+      "convention": "__thiscall",
+      "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py.",
+      "parameters": [
+        {
+          "name": "self",
+          "type": "ptr:WC3AgentRelations266",
+          "storage": "ECX"
+        },
+        {
+          "name": "context",
+          "type": "u32",
+          "storage": 4
+        }
+      ]
+    },
+    {
+      "address": "6f1465f0",
+      "name": "AgentWrapper_DetachIncomingRelations",
+      "returns": "void",
+      "convention": "__thiscall",
+      "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py.",
+      "parameters": [
+        {
+          "name": "self",
+          "type": "ptr:WC3AgentRelations266",
+          "storage": "ECX"
+        },
+        {
+          "name": "detachBoth",
+          "type": "u32",
+          "storage": 4
+        }
+      ]
+    },
+    {
+      "address": "6f146690",
+      "name": "AgentWrapper_DestroyOwnedChildren",
+      "returns": "void",
+      "convention": "__thiscall",
+      "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py.",
+      "parameters": [
+        {
+          "name": "self",
+          "type": "ptr:WC3AgentRelations266",
+          "storage": "ECX"
+        }
+      ]
+    },
+    {
+      "address": "6f145dc0",
+      "name": "AgentWrapper_BindChildRelation",
+      "returns": "void",
+      "convention": "__thiscall",
+      "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py.",
+      "parameters": [
+        {
+          "name": "self",
+          "type": "ptr:WC3AgentRelations266",
+          "storage": "ECX"
+        },
+        {
+          "name": "index",
+          "type": "u32",
+          "storage": 4
+        },
+        {
+          "name": "category",
+          "type": "u32",
+          "storage": 8
+        }
+      ]
+    },
+    {
+      "address": "6f146850",
+      "name": "AgentChildren_Append",
+      "returns": "u32",
+      "convention": "__thiscall",
+      "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py.",
+      "parameters": [
+        {
+          "name": "self",
+          "type": "ptr:WC3DynamicTablePrefix",
+          "storage": "ECX"
+        },
+        {
+          "name": "values",
+          "type": "ptr:void",
+          "storage": 4
+        },
+        {
+          "name": "count",
+          "type": "u32",
+          "storage": 8
+        }
+      ]
+    },
+    {
+      "address": "6f15e180",
+      "name": "AgentWrapper_BindReceiverRelation",
+      "returns": "void",
+      "convention": "__thiscall",
+      "evidence": "Payoff266: original populated factory graphs, native ECX/stack operands and RET. See Graph266Evidence.java and graph266_oracle.py.",
+      "parameters": [
+        {
+          "name": "self",
+          "type": "ptr:WC3AgentRelations266",
+          "storage": "ECX"
+        },
+        {
+          "name": "owner",
+          "type": "ptr:WC3AgentRelations266",
+          "storage": 4
+        },
+        {
+          "name": "list",
+          "type": "ptr:WC3AgentRelationList266",
+          "storage": 8
         }
       ]
     }

@@ -2357,3 +2357,14 @@ acceptance still requires GROUP-04.6's engine member storage/flags/shared
 parameters/phase integration; closing04.5 does not close that leaf.
 
 Fresh validation is `group-04.5-survivor-retarget-frozen-corpus/corpus-results.json`:120/120 declared outcomes, with all recorded source hashes still matching at completion. `LD_LIBRARY_PATH=/tmp/wc3-sdl2-build make -j8 test` passed78 Python tool tests and36720/36720 assertions in2127 tests for each RoC/TFT schema (`/tmp/wc3-group-04.5-survivor-retarget-full-suite.log`). Targeted movement validation has1514/1514 assertions in161 tests per schema; only `WC3_PATTERN='wc3_movement*'` selects that suite. Earlier exact/leading-wildcard patterns selected no tests and are not validation. The first full-frame fixture omitted monster think; after supplying the ordinary lifecycle, both roles moved and arrived. GROUP-04.5 is closed within the point-replacement scope; ORDER-01.4 owns the public active-order query discrepancy.
+
+
+### Populated point factory children and borrowed relations (Payoff266)
+
+The prior last-reference lifetime oracle used empty wrapper relations/children.
+[Payoff266](retail-pathfinding-engine.md#owned-task-children-retire-with-their-parent-payoff266)
+adds32 complete populated lifetimes across both point factories, native relation
+insertion, reverse nested child destruction, shared-child reference cleanup and
+exact reuse without allocations. The engine now releases an owned point-spell
+movement-goal task before returning its caster's storage. Borrowed units survive;
+existing retail lifecycle expectations are preserved.

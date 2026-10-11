@@ -6068,4 +6068,52 @@ TEST(wc3_spell, earthquake_retail_mask_is_enemy_only_and_reaches_invisible_units
     G_SetSLKRows("AbilityData", old); free_slk_rows(rows);
 }
 
+/* Native parent destruction must not leave an owned point task alive with a
+ * dangling owner, even when save is consumed before another polling frame. */
+TEST(wc3_spell, graph266_point_approach_child_is_released_with_caster) {
+    FOR_LOOP(mode,4) {
+        edict_t *caster=make_hero(MAKEFOURCC('H','p','a','l'),500,200,288,288);
+        slkTestData_t *rows=parse_slk_string(
+            "ID;PWXL;N;E\nC;Y1;X1;K\"alias\"\nC;Y1;X2;K\"code\"\n"
+            "C;Y1;X3;K\"Cost1\"\nC;Y1;X4;K\"Rng1\"\nC;Y1;X5;K\"Cool1\"\n"
+            "C;Y2;X1;K\"AHfs\"\nC;Y2;X2;K\"AHfs\"\nC;Y2;X3;K13\n"
+            "C;Y1;X6;K\"DataB1\"\nC;Y1;X7;K\"DataD1\"\n"
+            "C;Y1;X8;K\"Data21\"\nC;Y1;X9;K\"Data41\"\n"
+            "C;Y2;X4;K96\nC;Y2;X5;K7\nC;Y2;X6;K0.25\nC;Y2;X7;K0.75\n"
+            "C;Y2;X8;K0.25\nC;Y2;X9;K0.75\nE\n");
+        slkTestData_t *old=G_SetSLKRows("AbilityData",rows);
+        UnitAbilities_t abilities={.abilList="AHfs"};caster->data.UnitAbilities=&abilities;
+        caster->s.player=0;caster->movetype=MOVETYPE_STEP;caster->unitinfo.MoveSpeed=270;
+        T_ASSERT(S_IssuePointTargetSpell(caster,MAKEFOURCC('A','H','f','s'),&(vec2_t){1200,288}));
+        edict_t *child=caster->goalentity;
+        T_NOT_NULL(child);
+        if(!child) {G_SetSLKRows("AbilityData",old);free_slk_rows(rows);continue;}
+        T_ASSERT(child!=caster && child->owner==caster && child->goalentity==child);
+        T_ASSERT(child->think==S_SpellTargetApproachThink);T_NOT_NULL(child->channel);
+        edict_t *borrowed=alloc_test_unit(MAKEFOURCC('h','f','o','o'),1500,288);
+        if(mode&1) {
+            cstring_t file=Test_TempPath("wc3-graph266-live.bin");
+            T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+            T_ASSERT(caster->goalentity==child && child->owner==caster);
+        }
+        if(mode&2) {G_DeferFreeEdict(caster);G_TestFinishDeferredFrees();}
+        else G_FreeEdict(caster);
+        T_ASSERT(!caster->inuse);T_ASSERT(!child->inuse);T_ASSERT(borrowed->inuse);
+        /* Child release is idempotent through the next simulation frame, and
+         * a save never captures a still-live task referring to freed storage. */
+        cstring_t file=Test_TempPath("wc3-graph266-retired.bin");
+        T_ASSERT(WriteGame(file));T_ASSERT(ReadGame(file));remove(file);
+        T_ASSERT(!child->inuse);T_ASSERT(borrowed->inuse);
+        level.time+=30;globals.RunFrame();T_ASSERT(!child->inuse);
+        level.time+=1000;
+        bool reused=false;
+        FOR_LOOP(i,4) {
+            edict_t *replacement=G_Spawn();T_NOT_NULL(replacement);
+            if(replacement==child) {reused=true;T_NULL(replacement->channel);T_NULL(replacement->owner);}
+        }
+        T_ASSERT(reused);
+        reset_entities();setup_test_world();G_SetSLKRows("AbilityData",old);free_slk_rows(rows);
+    }
+}
+
 #endif /* BZ_TESTS */

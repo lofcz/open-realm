@@ -114,6 +114,7 @@ void G_FreeEdict(edict_t *ent) {
      * detaches storage, so cleanup cannot reinsert a retiring repulsor. */
     if (ent->buildwork && ent->buildwork->ability) S_CancelRepair(ent);
     S_UnitAbilityEvent(ent, A_UNIT_REMOVE);
+    S_SpellReleasePointApproach(ent);
     G_BotRemoveCaptainUnit(ent);
     /* Direct JASS RemoveUnit must release transient construction/upgrade state
      * before the edict is cleared. Forced removal does not grant a player
@@ -196,6 +197,7 @@ void G_DeferFreeEdictAt(edict_t *ent,wc3Clock_t const *clock) {
      * deferred storage release must not keep its commands or physical task. */
     G_ClearUnitOrderQueue(ent);
     ent->current_order_id = 0;
+    S_SpellReleasePointApproach(ent);
     S_UnitAbilityEvent(ent, A_UNIT_REMOVING);
     G_DetachRemovedConstructionWorker(ent);
     S_UnitTargetRemoved(ent);

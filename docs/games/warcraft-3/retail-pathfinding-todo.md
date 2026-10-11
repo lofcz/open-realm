@@ -55,7 +55,12 @@ because they did not establish an overall performance win. This performance
 work closes no additional retail research tasks. See
 [performance evidence](performance.md#october-5-synchronous-creation-follow-up).
 
-**286 done / 336 tasks; 50 remaining.**
+**287 done / 336 tasks; 49 remaining.**
+
+Payoff266 closes ORDER-04.2: original populated point-factory graphs verify
+borrowed relation unlinking, reverse nested child destruction, reference cleanup
+and exact reuse. The engine now releases owned point-spell tasks with their caster,
+including across immediate save/load. See [owned task cleanup](retail-pathfinding-engine.md#owned-task-children-retire-with-their-parent-payoff266).
 
 Payoff265 closes ORDER-04.3: complete original bridge guards in both handle
 domains, balanced reference pins and a failing-first engine fix suppress
@@ -1577,7 +1582,7 @@ Evidence: [order evidence][M]. Tools/artifacts: order_tasks, arrival, lifetime.
 ### ORDER-04 — Reference reclamation
 
 - [x] **ORDER-04.1** Eight last-reference release cycles and six factory reuses pass. Evidence: [payload reclamation][reclamation]; preallocated pools and supplied registration, no populated relations/negative domain.
-- [ ] **ORDER-04.2** Construct and release an object with populated relations/children through the real factory; assert child/reference cleanup and free-list recovery.
+- [x] **ORDER-04.2** Construct and release an object with populated relations/children through the real factory; assert child/reference cleanup and free-list recovery. Payoff266:16 populated graphs x2 lifetimes, both original point factories, all four relation lists, nested/null children, shared references and exact LIFO reuse. Engine-owned point tasks retire with the caster; direct/deferred/save/reuse regressions. [Evidence](retail-pathfinding-engine.md#owned-task-children-retire-with-their-parent-payoff266).
 - [x] **ORDER-04.3** Exercise bridge guard failure, stale identity and both handle domains; assert rejection and reference balance. Payoff265 verifies132 complete original calls, all host/identity/type/release guards, both signed-slot domains and balanced ref1/3 pins. Engine cancellation and scheduled completion now suppress pending-release receivers; ordinary/reuse/duplicate/external lifetimes pass. [Evidence](retail-pathfinding-engine.md#retired-movement-receivers-reject-completion-callbacks-payoff265).
 - [x] **ORDER-04.4** Grow an empty factory/pool through its allocator boundary; assert first construction and final payload/wrapper release. [Payoff192](retail-pathfinding-engine.md#cold-point-factories-and-empty-queue-storage-payoff192): cold original COrderPoint(58/1), CTaskPoint(50/64) and wrapper(bc/512) storage grows through513 simultaneous pairs per class,2052 final clock releases and allocation-free exact LIFO reuse. Supplied class/registry bindings are explicit. Two public129-unit Move bursts retain258 complete task lifetimes,270 markers and exact repeat/control streams. Engine reclaims empty queue buckets after cancellation/final dispatch; failing-first129-unit/stale-target/replacement tests and wrapped/empty save round-trips pass both schemas.
 

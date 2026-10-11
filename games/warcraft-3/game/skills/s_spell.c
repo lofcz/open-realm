@@ -977,6 +977,17 @@ static void spell_finish_target_approach(edict_t *thinker, bool arrived) {
     G_FreeEdict(thinker);
 }
 
+/* A point approach owns its goal thinker. Native146690 destroys owned
+ * children before returning the parent to its pool; polling is too late for
+ * an immediate save or slot reuse. Borrowed unit goals remain independent. */
+void S_SpellReleasePointApproach(edict_t *caster) {
+    edict_t *child=caster ? caster->goalentity : NULL;
+    if(!child || child==caster || !child->inuse || child->goalentity!=child ||
+       child->think!=S_SpellTargetApproachThink || S_SpellChannelOwner(child)!=caster)return;
+    S_SetMoveGoal(caster,&caster->goalentity,NULL);
+    G_FreeEdict(child);
+}
+
 void S_SpellTargetApproachThink(edict_t *thinker) {
     spell_finish_target_approach(thinker,false);
 }

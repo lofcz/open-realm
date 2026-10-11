@@ -4071,6 +4071,7 @@ void G_ClientSetCameraPosition(edict_t *, vec2_t const *);
 //  s_skills.c
 float AB_Data(cstring_t, uint32_t, uint32_t);
 uint32_t GetAbilityIndex(abilityProc_t);
+void S_SpellReleasePointApproach(edict_t *);
 void S_SpellTargetApproachThink(edict_t *);
 void S_SpellTargetApproachComplete(edict_t *, edict_t *, bool);
 void G_ResetHeroPassiveCaches(void);

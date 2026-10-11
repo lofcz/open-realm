@@ -16551,3 +16551,76 @@ and37 corpus integrity checks pass on the exact staged snapshot. Inventory:
 identical. No save/network layout or performance claim changes. Full validation
 remains on the authorized twelve-chunk cadence:3/12 after Payoff262. Archive:
 `/GitHub/wc3-analysis/reports/pathfinding-1.27/research/ORDER-04.3/payoff265/`.
+
+## Owned task children retire with their parent (Payoff266)
+
+ORDER-04.2 now executes both original point factories with populated owned-child
+arrays and all four borrowed-relation lists. `graph266_oracle.py` constructs
+COrderPoint and CTaskPoint through their real factories, allocates original
+canonical wrappers and attaches payloads through057c30. Each graph has four
+borrowed peers and four owned children; variants add two nested descendants,
+null array slots and an extra reference from the root payload to a child.
+Original146850 builds child arrays,15e180 binds borrowed peers and145dc0 binds
+owned children into categories0..3. Canonical identities, class bindings and
+the additional owned payload reference are supplied explicitly.
+
+Destruction marks the root before owner notification. Its payload cleanup
+runs first, then1465f0 drains relation lists3,2,1,0. Borrowed peers are unlinked
+without changing their payloads or identities.146690 destroys array children
+from last to first, skips nulls and recurses depth first. Child return order is
+postorder; root payload reclamation precedes child reclamation. An extra child
+reference2->1 keeps the child valid until its own wrapper releases the last
+reference through the original factory. Child-array backing remains allocated
+with logical count0. Final individual release of the borrowed peers leaves
+both factory and wrapper live counts0, registry live count0 and no clock request.
+All16 graphs run twice:320 factory objects,128 surviving borrowed-peer checks,
+exact inverse wrapper/payload free-list consumption and zero factory reuse imports.
+Child-array backing is accounted separately: each second lifetime allocates one
+new child array because its root reuses a formerly borrowed peer. This is real
+preparation work, not hidden by the factory reuse counter.
+No game instruction or callback is replaced. Only external Storm imports use
+host storage. Eight Ghidra notes, six explicit prototypes and three structure mappings are
+saved and exported twice identically;325 original instructions are pinned.
+
+The engine integration fixes an actual owned-task leak. A far point spell
+creates a polling task which is also the caster's movement goal. Final caster
+release previously left that task alive with a freed owner until later polling;
+an immediate save/load retained it. `S_SpellReleasePointApproach` now follows the
+existing goal pointer, checks the task procedure and captured owner generation,
+clears the parent link and frees the owned task before parent storage is returned.
+Deferred removal runs the same inverse before Move clears that link.
+It performs no global scan, allocates nothing and does not release borrowed
+unit targets. Ground target-spell receivers retain their existing physical-group
+completion cleanup. Wider point/air/structure cast behavior remains ORDER-01.13;
+this is ownership cleanup, not a claim that those legacy approaches match retail
+movement timing.
+
+The failing-first production regression starts an actual far Flame Strike point
+order, then removes its caster directly or through deferred release, with and
+without a prior live save. All four cases reproduced three leaked-child assertions
+before the fix. The final checks include immediate post-removal save/load,
+unrelated-unit survival and freed child slot reuse. The deliberately small test
+row supplies valid, non-stock pulse intervals in both Classic/TFT column forms;
+the rejected first draft lacked mandatory intervals and is archived only as a
+harness diagnostic, not as retail evidence. Existing frozen expectations remain
+unchanged. This synthetic factory graph adds no public Frida reachability claim;
+prior [public removal/reuse captures](#interruption-keeps-successor-ownership-through-completion-and-release-payoff209)
+remain separate and unchanged.
+
+Run the original and production checks with a fresh report:
+
+```sh
+/GitHub/wc3-analysis/verify-venv/bin/python tools/ghidra/verify_wc3_pathing_graph266.py \
+  --binary /run/media/lofcz/ssd_external/Games/w3-research2/game.dll \
+  --report /tmp/graph266-fresh.json
+```
+
+Focused validation passes74 tests /16,549 assertions per Classic/TFT mode,
+including86 assertions in the new production regression. All32 original graph
+lifetimes and325 instruction pins pass. Twelve evidence rejection checks and37
+corpus integrity checks pass on the isolated snapshot. All501 prior corpus
+entry contracts are structurally unchanged; inventory is221 executable contracts
+/502 entries. Evidence archive:
+`/GitHub/wc3-analysis/reports/pathfinding-1.27/research/ORDER-04.2/payoff266/`.
+Full validation remains on the authorized twelve-chunk cadence:4/12 after
+Payoff262. No saved-state or network layout changes are required.
